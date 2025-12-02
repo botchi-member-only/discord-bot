@@ -104,6 +104,8 @@ async def translate(
             direction == "to_en"
         else:
             direction == "to_ja"
+        await interaction.followup.send(f"⚠️ {detected}", ephemeral=ephemeral)
+        return
     try:
         if direction == "to_en":
             src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
@@ -123,6 +125,7 @@ async def hanbetu(interaction: discord.Interaction, ephemeral: bool = False):
 
     target_message = None
     async for msg in interaction.channel.history(limit=10):
+        if msg.content and not msg.author.bot:
             target_message = msg
             break
 
