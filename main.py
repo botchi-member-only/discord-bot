@@ -61,13 +61,14 @@ async def help_command(message):
     ephemeral="実行者だけに表示するかどうか（true/false、省略可）"
 )
 @app_commands.choices(direction=[
+    app_commands.Choice(name="自動auto",value="auto"),
     app_commands.Choice(name="日本語 → 英語", value="to_en"),
     app_commands.Choice(name="英語 → 日本語", value="to_ja")
 ])
 async def translate(
     interaction: discord.Interaction,
     message_id: str = None,
-    direction: str = "to_ja",
+    direction: str = "auto",
     ephemeral: bool = False
 ):
     await interaction.response.defer(thinking=True, ephemeral=ephemeral)
@@ -92,6 +93,16 @@ async def translate(
     if not text:
         await interaction.followup.send("❌ 翻訳するテキストが空です。", ephemeral=ephemeral)
         return
+    try:
+        detected = detect(text)  # ja / en / etc...
+    except:
+        await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
+        return
+    if direction == "auto":
+        if detected.startswith("ja"):
+            direction == "to_en"
+        else:
+            direction == "to_jp"
     try:
         if direction == "to_en":
             src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
