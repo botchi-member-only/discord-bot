@@ -88,13 +88,16 @@ async def translate(
         if message is None:
             await interaction.followup.send("❌ 翻訳対象のメッセージが見つかりません。", ephemeral=ephemeral)
             return
-    #text = message.content.strip()    
-    text = message
+    text = message.content.strip()
+    if not text:
+        await interaction.followup.send(f"❌ メッセージが空です。{message}", ephemeral=ephemeral)
+        return
+        
     if direction == "auto":
         try:
             detected = detect(text)  # ja / en / etc...
         except:
-            await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
+            await interaction.followup.send(f"⚠️ 判別中にエラーが発生しました。{message}", ephemeral=ephemeral)
             return
         if detected.startswith("ja"):
             direction == "to_en"
@@ -108,7 +111,7 @@ async def translate(
         translated = GoogleTranslator(source=src, target=dest).translate(text)
         result = f"{flag}\n> **{translated}**"
     except Exception as e:
-        await interaction.followup.send(f"⚠️ 翻訳中にエラーが発生しました: {e}", ephemeral=ephemeral)
+        await interaction.followup.send(f"⚠️ 翻訳中にエラーが発生しました:{message} ,{e}", ephemeral=ephemeral)
         return
     await interaction.followup.send(result, ephemeral=ephemeral)
 
@@ -119,7 +122,6 @@ async def hanbetu(interaction: discord.Interaction, ephemeral: bool = False):
 
     target_message = None
     async for msg in interaction.channel.history(limit=10):
-        if msg.author != interaction.user and not msg.author.bot:
             target_message = msg
             break
 
