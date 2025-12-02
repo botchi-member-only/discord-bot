@@ -83,6 +83,7 @@ async def translate(
     else:
         # 直近の「ユーザーが送った」メッセージを取得
         async for msg in interaction.channel.history(limit=10):
+            if msg.content and not msg.author.bot:
                 message = msg
                 break
         if message is None:
@@ -90,14 +91,14 @@ async def translate(
             return
     text = message.content.strip()
     if not text:
-        await interaction.followup.send(f"❌ メッセージが空です。{message}", ephemeral=ephemeral)
+        await interaction.followup.send("❌ メッセージが空です。", ephemeral=ephemeral)
         return
         
     if direction == "auto":
         try:
             detected = detect(text)  # ja / en / etc...
         except:
-            await interaction.followup.send(f"⚠️ 判別中にエラーが発生しました。{message}", ephemeral=ephemeral)
+            await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
             return
         if detected.startswith("ja"):
             direction == "to_en"
@@ -111,7 +112,7 @@ async def translate(
         translated = GoogleTranslator(source=src, target=dest).translate(text)
         result = f"{flag}\n> **{translated}**"
     except Exception as e:
-        await interaction.followup.send(f"⚠️ 翻訳中にエラーが発生しました:{message} ,{e}", ephemeral=ephemeral)
+        await interaction.followup.send("⚠️ 翻訳中にエラーが発生しました:{e}", ephemeral=ephemeral)
         return
     await interaction.followup.send(result, ephemeral=ephemeral)
 
