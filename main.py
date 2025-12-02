@@ -102,7 +102,7 @@ async def translate(
         if detected.startswith("ja"):
             direction == "to_en"
         else:
-            direction == "to_jp"
+            direction == "to_ja"
     try:
         if direction == "to_en":
             src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
