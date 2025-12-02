@@ -88,11 +88,7 @@ async def translate(
         if message is None:
             await interaction.followup.send("❌ 翻訳対象のメッセージが見つかりません。", ephemeral=ephemeral)
             return
-    text = message.content.strip()
-    if not text:
-        await interaction.followup.send("❌ 翻訳するテキストが空です。", ephemeral=ephemeral)
-        return
-    
+    text = message.content.strip()    
     if direction == "auto":
         try:
             detected = detect(text)  # ja / en / etc...
@@ -114,6 +110,38 @@ async def translate(
         await interaction.followup.send(f"⚠️ 翻訳中にエラーが発生しました: {e}", ephemeral=ephemeral)
         return
     await interaction.followup.send(result, ephemeral=ephemeral)
+
+@tree.command(name="hanbetu", description="直前のメッセージの言語を判別します")
+async def hanbetu(interaction: discord.Interaction, ephemeral: bool = False):
+
+    await interaction.response.defer(ephemeral=ephemeral)
+
+    target_message = None
+    async for msg in interaction.channel.history(limit=10):
+        if msg.author != interaction.user and not msg.author.bot:
+            target_message = msg
+            break
+
+    if not target_message:
+        await interaction.followup.send("❌ 判別対象のメッセージが見つかりません。", ephemeral=ephemeral)
+        return
+
+    text = target_message.content.strip()
+    if not text:
+        await interaction.followup.send("❌ メッセージが空です。", ephemeral=ephemeral)
+        return
+
+    lang = detect_jp_en(text)
+
+    if lang == "ja":
+        result = "🟥 **日本語と判別されました！**"
+    else:
+        result = "🟦 **英語と判別されました！**"
+
+    await interaction.followup.send(
+        f"🔍 **言語判別結果**\nメッセージ: `{text}`\n→ {result}",
+        ephemeral=ephemeral
+    )
 
 @client.event
 async def on_message(message):
