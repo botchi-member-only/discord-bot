@@ -1,6 +1,4 @@
-from flask import Flask, jsonify, request
-import requests
-import os
+from flask import Flask
 from threading import Thread
 
 app = Flask('')
