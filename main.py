@@ -92,12 +92,13 @@ async def translate(
     if not text:
         await interaction.followup.send("❌ 翻訳するテキストが空です。", ephemeral=ephemeral)
         return
-    try:
-        detected = detect(text)  # ja / en / etc...
-    except:
-        await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
-        return
+    
     if direction == "auto":
+        try:
+            detected = detect(text)  # ja / en / etc...
+        except:
+            await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
+            return
         if detected.startswith("ja"):
             direction == "to_en"
         else:
@@ -113,54 +114,6 @@ async def translate(
         await interaction.followup.send(f"⚠️ 翻訳中にエラーが発生しました: {e}", ephemeral=ephemeral)
         return
     await interaction.followup.send(result, ephemeral=ephemeral)
-
-@tree.command(name="hanbetu", description="直前のメッセージの言語を判別します")
-@app_commands.describe(
-    ephemeral="実行者だけに見せる場合は true（省略可）"
-)
-async def hanbetu(
-    interaction: discord.Interaction,
-    ephemeral: bool = False
-):
-    await interaction.response.defer(ephemeral=ephemeral)
-
-    # ------- 直前の「相手のメッセージ」を取得 -------
-    target_message = None
-    async for msg in interaction.channel.history(limit=10):
-        if msg.author != interaction.user and not msg.author.bot:
-            target_message = msg
-            break
-
-    if target_message is None:
-        await interaction.followup.send("❌ 判別対象のメッセージが見つかりません。", ephemeral=ephemeral)
-        return
-
-    text = target_message.content.strip()
-    if not text:
-        await interaction.followup.send("❌ メッセージが空のため判別できません。", ephemeral=ephemeral)
-        return
-
-    # ------- 言語判定 -------
-    try:
-        detected = detect(text)  # ja / en / etc...
-    except:
-        await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
-        return
-
-    # ------- 二択に限定 -------
-    if detected.startswith("ja"):
-        result = "🟥 **日本語と判別されました！**"
-    else:
-        # 英語として扱う（多言語は全てこちら扱い）
-        result = "🟦 **英語と判別されました！**"
-
-    # ------- 結果を表示 -------
-    message = (
-        f"🔍 **言語判別結果**\n"
-        f"メッセージ: `{text}`\n"
-        f"→ {result}"
-    )
-    await interaction.followup.send(message, ephemeral=ephemeral)
 
 @client.event
 async def on_message(message):
