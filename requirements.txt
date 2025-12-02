@@ -7,3 +7,4 @@ requests-cache
 pandas
 retry-requests
 deep-translator
+langdetect
