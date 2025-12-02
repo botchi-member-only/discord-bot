@@ -1,0 +1,9 @@
+discord.py==2.1.1
+Flask==2.3.3
+discord.py[voice]
+PyNaCl
+openmeteo-requests
+requests-cache
+pandas
+retry-requests
+deep-translator
