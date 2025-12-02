@@ -88,7 +88,8 @@ async def translate(
         if message is None:
             await interaction.followup.send("❌ 翻訳対象のメッセージが見つかりません。", ephemeral=ephemeral)
             return
-    text = message.content.strip()    
+    #text = message.content.strip()    
+    text = message
     if direction == "auto":
         try:
             detected = detect(text)  # ja / en / etc...
