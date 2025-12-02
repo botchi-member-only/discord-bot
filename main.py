@@ -83,7 +83,7 @@ async def translate(
     else:
         # 直近の「ユーザーが送った」メッセージを取得
         async for msg in interaction.channel.history(limit=10):
-            if msg.author != interaction.user and not msg.author.bot:
+            if msg.author != msg.author.bot:
                 message = msg
                 break
         if message is None:
