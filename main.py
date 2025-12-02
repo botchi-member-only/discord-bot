@@ -101,11 +101,9 @@ async def translate(
             await interaction.followup.send("⚠️ 判別中にエラーが発生しました。", ephemeral=ephemeral)
             return
         if detected.startswith("ja"):
-            direction == "to_en"
+            direction = "to_en"
         else:
-            direction == "to_ja"
-        await interaction.followup.send(f"⚠️ {detected}", ephemeral=ephemeral)
-        return
+            direction = "to_ja"
     try:
         if direction == "to_en":
             src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
