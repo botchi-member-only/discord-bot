@@ -23,7 +23,7 @@ tree = app_commands.CommandTree(client)
 # 日本時間（JST）
 JST = timezone(timedelta(hours=9))
 
-ALLOWED_GUILD_IDS = {742727484750954577,1389253121649414239}  # ✅ Botが所属できるサーバーIDをここに記入（複数対応可）
+ALLOWED_GUILD_IDS = {1389253121649414239,742727484750954577}  # ✅ Botが所属できるサーバーIDをここに記入（複数対応可）
 
 #save機能
 AUTO_TRANSLATE_FILE = "AutoTranslateChannel.json"
@@ -38,7 +38,21 @@ async def on_ready():
     await client.change_presence(status=discord.Status.online, activity=activity)
     # スラッシュコマンドを同期
     await tree.sync()
-    
+
+@client.event
+async def on_guild_join(guild):
+    if guild.id not in ALLOWED_GUILD_IDS:
+        print(f"❌ 許可されていないサーバー ({guild.name}) に参加したため退出します。")
+        try:
+            await guild.leave()
+            channel_id = '1389456562166436051'
+            channel = client.get_channel(channel_id)
+            await channel.send(f"❌ 許可されていないサーバー ({guild.name}) に参加したため退出します。")
+        except Exception as e:
+            print(f"⚠️ サーバーから退出できませんでした: {e}")
+    else:
+        print(f"✅ 許可されたサーバー ({guild.name}) に参加しました。")
+
 #スラッシュコマンド
 @tree.command(name='membercount', description='サーバーの人数を表示します') 
 async def member_count(message):
