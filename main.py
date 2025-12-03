@@ -121,37 +121,52 @@ async def translate(
         return
     await interaction.followup.send(result, ephemeral=ephemeral)
 
-@tree.command(name="hanbetu", description="直前のメッセージの言語を判別します")
-async def hanbetu(interaction: discord.Interaction, ephemeral: bool = False):
-
-    await interaction.response.defer(ephemeral=ephemeral)
-
-    target_message = None
-    async for msg in interaction.channel.history(limit=10):
-        if msg.content and not msg.author.bot:
-            target_message = msg
-            break
-
-    if not target_message:
-        await interaction.followup.send("❌ 判別対象のメッセージが見つかりません。", ephemeral=ephemeral)
-        return
-
-    text = target_message.content.strip()
-    if not text:
-        await interaction.followup.send("❌ メッセージが空です。", ephemeral=ephemeral)
-        return
-
-    lang = detect_jp_en(text)
-
-    if lang == "ja":
-        result = "🟥 **日本語と判別されました！**"
-    else:
-        result = "🟦 **英語と判別されました！**"
-
-    await interaction.followup.send(
-        f"🔍 **言語判別結果**\nメッセージ: `{text}`\n→ {result}",
-        ephemeral=ephemeral
+@tree.command(name="AutoTranslateMode", description="自動翻訳モードをチャンネルごとにON/OFFします。")
+@app_commands.describe(
+    direction="ON / OFF を選択"
+)
+@app_commands.choices(direction=[
+    app_commands.Choice(name="ON", value="on"),
+    app_commands.Choice(name="OFF", value="off"),
+])
+async def AutoTranslateModeChange(interaction: discord.Interaction, direction: str):
+    channel_id = str(interaction.channel_id)
+    # 現在の設定をロード
+    data = load_auto_translate_settings()
+    # 設定を保存
+    data[channel_id] = direction
+    save_auto_translate_settings(data)
+    trigger_github_action(data)
+    mode_text = "ON" if direction == "on" else "OFF"
+    await interaction.response.send_message(
+        f"🌐 このチャンネルの自動翻訳モードを **{mode_text}** に切り替えました！"
     )
+# ▼ JSON 読み書き関数 ▼
+AUTO_TRANSLATE_FILE = "auto_translate.json"
+def load_auto_translate_settings():
+    if not os.path.exists(AUTO_TRANSLATE_FILE):
+        return {}
+    with open(AUTO_TRANSLATE_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
+def save_auto_translate_settings(data):
+    with open(AUTO_TRANSLATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+def trigger_github_action(data):
+    """GitHub Actionsに更新リクエストを送る"""
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+    payload = {
+        "event_type": "update-money",
+        "client_payload": {
+            "data": json.dumps(data, ensure_ascii=False)
+        }
+    }
+    r = requests.post(url, headers=headers, json=payload)
+    print("GitHub Action Trigger:", r.status_code, r.text)
+
 
 @client.event
 async def on_message(message):
