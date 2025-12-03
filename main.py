@@ -198,8 +198,7 @@ async def on_message(message):
         except:
             return
         # 返信形式で送信
-        await message.reply(f"{flag}\n{translated}")
-        
+        await message.reply(f"{translated}", mention_author=False)
     if message.content == "こんにちは":
         await message.channel.send("こんにちは！")
 
