@@ -177,22 +177,21 @@ async def on_message(message):
     settings = load_auto_translate_settings()  # ← すでに定義済みの関数を使用
     is_auto = settings.get(channel_id) == "on"
     if is_auto:
-        return
-    text = message.content.strip()
-    detected = detect(text)  # ja / en / etc...
-    if detected.startswith("ja"):
-         direction = "to_en"
-    else:
-         direction = "to_ja"
-    try:
-        if direction == "to_en":
-            src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
+        text = message.content.strip()
+        detected = detect(text)  # ja / en / etc...
+        if detected.startswith("ja"):
+            direction = "to_en"
         else:
-            src, dest, flag = "en", "ja", "🇺🇸 → 🇯🇵"
-            translated = GoogleTranslator(source=src, target=dest).translate(text)
-    except Exception as e:
-        return
-    await message.reply(f"{translated}")
+            direction = "to_ja"
+        try:
+            if direction == "to_en":
+                src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
+            else:
+                src, dest, flag = "en", "ja", "🇺🇸 → 🇯🇵"
+                translated = GoogleTranslator(source=src, target=dest).translate(text)
+        except Exception as e:
+            return
+        await message.reply(f"{translated}")
         
     if message.content == "こんにちは":
         await message.channel.send("こんにちは！")
