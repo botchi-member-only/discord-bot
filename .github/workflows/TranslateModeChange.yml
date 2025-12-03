@@ -2,26 +2,31 @@ name: Update AutoTranslateChannel.json
 
 on:
   repository_dispatch:
-    types: [update-money]
+    types: [TranslateModeChange]
 
 permissions:
-  contents: write   # ←これ重要
+  contents: write  # ← これが無いと push できない
 
 jobs:
   update:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Git
         run: |
-          git config user.name "MoneyBot"
-          git config user.email "moneybot@example.com"
+          git config user.name "TranslateBot"
+          git config user.email "translatebot@example.com"
 
       - name: Update AutoTranslateChannel.json
         run: |
-          echo '${{ github.event.client_payload.data }}' | jq '.' > AutoTranslateChannel.json
-          git add server_money.json
-          git commit -m "Update AutoTranslateChannel"
+          # Payload の data をファイルに書き込む
+          echo '${{ github.event.client_payload.data }}' > AutoTranslateChannel.json
+
+      - name: Commit and push
+        run: |
+          git add AutoTranslateChannel.json
+          git commit -m "Update AutoTranslateChannel.json (auto-save)"
           git push
