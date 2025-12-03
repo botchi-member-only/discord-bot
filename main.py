@@ -68,6 +68,10 @@ async def help_command(message):
                           color=0xffffff, # フレーム色指定(今回は白)
                           description="このbotの使い方を説明します。"
                           )
+    embed.set_author(name=client.user, # Botのユーザー名
+                     url="https://botchi-member-only.github.io/botchi-resource/botchi-logo.png",
+                     icon_url=client.user.avatar_url # Botのアイコンを設定してみる
+                     )
     embed.add_field(name="/help",value="今表示しているものです。", inline=False) # フィールドを追加。
     embed.add_field(name="/translate",value="英語と日本語を翻訳します。", inline=False)
     embed.add_field(name="/auto_translate_mode",value="自動翻訳を開始します。", inline=False)
