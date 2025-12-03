@@ -121,7 +121,7 @@ async def translate(
         return
     await interaction.followup.send(result, ephemeral=ephemeral)
 
-@tree.command(name="AutoTranslateMode", description="自動翻訳モードをチャンネルごとにON/OFFします。")
+@tree.command(name="auto_translate_mode", description="自動翻訳モードをチャンネルごとにON/OFFします。")
 @app_commands.describe(
     direction="ON / OFF を選択"
 )
