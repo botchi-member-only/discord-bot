@@ -26,7 +26,7 @@ JST = timezone(timedelta(hours=9))
 ALLOWED_GUILD_IDS = {742727484750954577,1389253121649414239}  # ✅ Botが所属できるサーバーIDをここに記入（複数対応可）
 
 #save機能
-TranslateDATA_FILE = "AutoTranslateChannel.json"
+AUTO_TRANSLATE_FILE = "AutoTranslateChannel.json"
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # 安全な方法で読み込む
 
@@ -146,10 +146,11 @@ AUTO_TRANSLATE_FILE = "auto_translate.json"
 def load_auto_translate_settings():
     if not os.path.exists(AUTO_TRANSLATE_FILE):
         return {}
-    with open(TranslateDATA_FILE, "r", encoding="utf-8") as f:
+    with open(AUTO_TRANSLATE_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
+
 def save_auto_translate_settings(data):
-    with open(TranslateDATA_FILE, "w", encoding="utf-8") as f:
+    with open(AUTO_TRANSLATE_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 def trigger_github_action(data):
     """GitHub Actionsに更新リクエストを送る"""
