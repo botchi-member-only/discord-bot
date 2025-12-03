@@ -190,8 +190,8 @@ async def on_message(message):
                 src, dest, flag = "en", "ja", "🇺🇸 → 🇯🇵"
                 translated = GoogleTranslator(source=src, target=dest).translate(text)
         except Exception as e:
-            translated = e
-            #return
+            await message.reply(f"{e},{direction},{text},:{message}")
+            return
         await message.reply(f"{translated}")
         
     if message.content == "こんにちは":
