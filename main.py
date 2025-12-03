@@ -47,28 +47,28 @@ async def member_count(message):
     # ユーザとBOTを区別しない場合
     member_count = guild.member_count
     await message.response.send_message(f'今の人数は{member_count}です')
-@tree.command(name='help', description='疾風の使い方') 
+@tree.command(name='help', description='BOTの使い方') 
 async def help_command(message):
-    help_message = discord.Embed( # Embedを定義する
+    embed = discord.Embed( # Embedを定義する
                           title="Botの使い方",# タイトル
-                          color=0x00ff00, # フレーム色指定(今回は緑)
+                          color=0xffffff, # フレーム色指定(今回は白)
                           description="このbotの使い方を説明します。"
                           )
-    help_message.add_field(name="/help",value="今表示しているものです。", inline=False) # フィールドを追加。
-    help_message.add_field(name="/",value="開発中。", inline=False)
-    help_message.add_field(name="/",value="開発中", inline=False)
-    await message.response.send_message(embed=help_message) # embedの送信には、embed={定義したembed名}
+    embed.add_field(name="/help",value="今表示しているものです。", inline=False) # フィールドを追加。
+    embed.add_field(name="/translate",value="英語と日本語を翻訳します。", inline=False)
+    embed.add_field(name="/auto_translate_mode",value="自動翻訳を開始します。", inline=False)
+    await message.response.send_message(embed=embed) # embedの送信には、embed={定義したembed名}
 
 @tree.command(name="translate", description="メッセージを翻訳します")
 @app_commands.describe(
     message_id="翻訳したいメッセージのID（省略可）",
-    direction="翻訳方向を選択（to_en: 日本語→英語, to_ja: 英語→日本語）",
+    direction="翻訳方向を選択（to_en: 日本語→English, to_ja: English→日本語）",
     ephemeral="実行者だけに表示するかどうか（true/false、省略可）"
 )
 @app_commands.choices(direction=[
-    app_commands.Choice(name="自動auto",value="auto"),
-    app_commands.Choice(name="日本語 → 英語", value="to_en"),
-    app_commands.Choice(name="英語 → 日本語", value="to_ja")
+    app_commands.Choice(name="自動/Auto",value="auto"),
+    app_commands.Choice(name="日本語 → English", value="to_en"),
+    app_commands.Choice(name="English → 日本語", value="to_ja")
 ])
 async def translate(
     interaction: discord.Interaction,
