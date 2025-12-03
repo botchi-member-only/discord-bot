@@ -25,6 +25,11 @@ JST = timezone(timedelta(hours=9))
 
 ALLOWED_GUILD_IDS = {742727484750954577,1389253121649414239}  # ✅ Botが所属できるサーバーIDをここに記入（複数対応可）
 
+#save機能
+TranslateDATA_FILE = "AutoTranslateChannel.json"
+REPO = "botchi-member-only/discord-bot"
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")  # 安全な方法で読み込む
+
 @client.event
 async def on_ready():
     print('ログインしました')
