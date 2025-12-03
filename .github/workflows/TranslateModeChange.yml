@@ -1,0 +1,27 @@
+name: Update server_money.json
+
+on:
+  repository_dispatch:
+    types: [update-money]
+
+permissions:
+  contents: write   # ←これ重要
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "MoneyBot"
+          git config user.email "moneybot@example.com"
+
+      - name: Update server_money.json
+        run: |
+          echo '${{ github.event.client_payload.data }}' | jq '.' > server_money.json
+          git add server_money.json
+          git commit -m "Update money data"
+          git push
