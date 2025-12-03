@@ -1,4 +1,4 @@
-name: Update server_money.json
+name: Update AutoTranslateChannel.json
 
 on:
   repository_dispatch:
@@ -21,7 +21,7 @@ jobs:
 
       - name: Update server_money.json
         run: |
-          echo '${{ github.event.client_payload.data }}' | jq '.' > server_money.json
+          echo '${{ github.event.client_payload.data }}' | jq '.' > AutoTranslateChannel.json
           git add server_money.json
-          git commit -m "Update money data"
+          git commit -m "Update AutoTranslateChannel"
           git push
