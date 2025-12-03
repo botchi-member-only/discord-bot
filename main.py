@@ -146,10 +146,10 @@ AUTO_TRANSLATE_FILE = "auto_translate.json"
 def load_auto_translate_settings():
     if not os.path.exists(AUTO_TRANSLATE_FILE):
         return {}
-    with open(AUTO_TRANSLATE_FILE, "r", encoding="utf-8") as f:
+    with open(TranslateDATA_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 def save_auto_translate_settings(data):
-    with open(AUTO_TRANSLATE_FILE, "w", encoding="utf-8") as f:
+    with open(TranslateDATA_FILE, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 def trigger_github_action(data):
     """GitHub Actionsに更新リクエストを送る"""
