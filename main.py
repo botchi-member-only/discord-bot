@@ -130,7 +130,7 @@ async def translate(
     app_commands.Choice(name="OFF", value="off"),
 ])
 async def AutoTranslateModeChange(interaction: discord.Interaction, direction: str):
-    channel_id = str(interaction.channel_id)
+    channel_id = str(interaction.channel.id)
     # 現在の設定をロード
     data = load_auto_translate_settings()
     # 設定を保存
@@ -170,29 +170,35 @@ def trigger_github_action(data):
 
 @client.event
 async def on_message(message):
-    if message.author == client.user:
+    # Bot自身のメッセージは翻訳しない
+    if message.author.bot:
         return
+
     # ▼ 自動翻訳 ON/OFF の読み取り
     channel_id = str(message.channel.id)
-    settings = load_auto_translate_settings()  # ← すでに定義済みの関数を使用
+    settings = load_auto_translate_settings()
     is_auto = settings.get(channel_id) == "on"
     if is_auto:
         text = message.content.strip()
-        detected = detect(text)  # ja / en / etc...
-        if detected.startswith("ja"):
-            direction = "to_en"
-        else:
-            direction = "to_ja"
-        try:
-            if direction == "to_en":
-                src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
-            else:
-                src, dest, flag = "en", "ja", "🇺🇸 → 🇯🇵"
-                translated = GoogleTranslator(source=src, target=dest).translate(text)
-        except Exception as e:
-            await message.reply(f"{e},{direction},{text},:{message}")
+        if not text:
             return
-        await message.reply(f"{translated}")
+        # 言語判定
+        try:
+            detected = detect(text)
+        except:
+            return
+        # 翻訳方向を決定
+        if detected.startswith("ja"):
+            src, dest, flag = "ja", "en", "🇯🇵 → 🇺🇸"
+        else:
+            src, dest, flag = "en", "ja", "🇺🇸 → 🇯🇵"
+        # 翻訳
+        try:
+            translated = GoogleTranslator(source=src, target=dest).translate(text)
+        except:
+            return
+        # 返信形式で送信
+        await message.reply(f"{flag}\n{translated}")
         
     if message.content == "こんにちは":
         await message.channel.send("こんにちは！")
