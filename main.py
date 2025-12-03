@@ -159,7 +159,7 @@ def trigger_github_action(data):
         "Authorization": f"token {GITHUB_TOKEN}"
     }
     payload = {
-        "event_type": "update-money",
+        "event_type": "TranslateModeChange",
         "client_payload": {
             "data": json.dumps(data, ensure_ascii=False)
         }
