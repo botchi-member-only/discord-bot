@@ -142,7 +142,6 @@ async def AutoTranslateModeChange(interaction: discord.Interaction, direction: s
         f"🌐 このチャンネルの自動翻訳モードを **{mode_text}** に切り替えました！"
     )
 # ▼ JSON 読み書き関数 ▼
-AUTO_TRANSLATE_FILE = "auto_translate.json"
 def load_auto_translate_settings():
     if not os.path.exists(AUTO_TRANSLATE_FILE):
         return {}
