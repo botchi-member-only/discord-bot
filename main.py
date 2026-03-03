@@ -20,6 +20,9 @@ intents.members = True  # メンバー参加イベントを取得するために
 client = discord.Client(intents=intents)
 tree = app_commands.CommandTree(client)
 
+from member_manager import setup as setup_member
+setup_member(tree)
+
 # 日本時間（JST）
 JST = timezone(timedelta(hours=9))
 
