@@ -22,6 +22,8 @@ tree = app_commands.CommandTree(client)
 
 from member_manager import setup as setup_member
 setup_member(tree)
+from game_manager import setup as setup_game
+setup_game(tree)
 
 # 日本時間（JST）
 JST = timezone(timedelta(hours=9))
