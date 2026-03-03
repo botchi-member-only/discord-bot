@@ -1,0 +1,30 @@
+name: Update GameParticipants.json
+
+on:
+  repository_dispatch:
+    types: [GameUpdate]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "GameBot"
+          git config user.email "gamebot@example.com"
+
+      - name: Update GameParticipants.json
+        run: |
+          echo '${{ github.event.client_payload.data }}' > GameParticipants.json
+
+      - name: Commit and push
+        run: |
+          git add GameParticipants.json
+          git commit -m "Update GameParticipants.json (auto-save)"
+          git push
