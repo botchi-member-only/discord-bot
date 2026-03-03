@@ -1,0 +1,30 @@
+name: Update Members.json
+
+on:
+  repository_dispatch:
+    types: [MemberUpdate]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "MemberBot"
+          git config user.email "memberbot@example.com"
+
+      - name: Update Members.json
+        run: |
+          echo '${{ github.event.client_payload.data }}' > Members.json
+
+      - name: Commit and push
+        run: |
+          git add Members.json
+          git commit -m "Update Members.json (auto-save)"
+          git push
