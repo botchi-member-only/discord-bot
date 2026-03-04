@@ -3,7 +3,6 @@ from discord import app_commands
 import json
 import os
 import requests
-import random
 
 MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
@@ -183,8 +182,10 @@ def setup(tree: app_commands.CommandTree):
 
         # 均等振り分け
         for p in participants_list:
-            # 最小値を取得
-            min_power = min(t["total_power"] for t in teams)
+            weakest_team = min(
+                teams,
+                key=lambda t: (t["total_power"], len(t["members"]))
+            )
 
             weakest_team["members"].append({
                 "display_name": p.get("name", "Unknown"),
