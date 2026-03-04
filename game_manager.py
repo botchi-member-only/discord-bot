@@ -430,7 +430,18 @@ def setup(tree: app_commands.CommandTree):
         course: str,
         time: str
     ):
+        thread_data = load_json(THREAD_FILE)
+        valid_thread_ids = [
+            v["thread_id"]
+            for v in thread_data.get("teams", {}).values()
+        ]
 
+        if str(interaction.channel.id) not in valid_thread_ids:
+            await interaction.response.send_message(
+                "❌ このスレッドでは使用できません。",
+                ephemeral=True
+            )
+            return
         # ① スレッドチェック
         if not isinstance(interaction.channel, discord.Thread):
             await interaction.response.send_message(
@@ -479,11 +490,84 @@ def setup(tree: app_commands.CommandTree):
         result_channel = interaction.client.get_channel(RESULT_CHANNEL_ID)
 
         if result_channel:
-            await result_channel.send(
-                f"🏁 **タイム提出**\n"
-                f"👤 {user_name}\n"
-                f"🗺️ {course}\n"
-                f"⏱️ {time}"
+            await interaction.followup.send(
+                f"✅ **タイムを提出しました**\n\n"
+                f"🗺️ コース: {course}\n"
+                f"⏱️ タイム: {time}\n\n"
+                f"🎥 走行動画を運営へ提出してください。",
+                ephemeral=True
             )
 
         await interaction.followup.send("✅ タイムを提出しました。", ephemeral=True)
+    @tree.command(name="withdrawtime", description="提出したタイムを撤回します")
+    @app_commands.describe(
+        course="撤回するコースを選択"
+    )
+    @app_commands.autocomplete(course=course_autocomplete)
+    async def withdraw_time(
+        interaction: discord.Interaction,
+        course: str
+    ):
+
+        # スレッドチェック
+        if not isinstance(interaction.channel, discord.Thread):
+            await interaction.response.send_message(
+                "❌ このコマンドは戦略会議スレッド内でのみ使用できます。",
+                ephemeral=True
+            )
+            return
+
+        thread_data = load_json(THREAD_FILE)
+        valid_thread_ids = [
+            v["thread_id"]
+            for v in thread_data.get("teams", {}).values()
+        ]
+
+        if str(interaction.channel.id) not in valid_thread_ids:
+            await interaction.response.send_message(
+                "❌ このスレッドでは使用できません。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        user_id = str(interaction.user.id)
+        thread_id = str(interaction.channel.id)
+
+        data = load_json(SUBMIT_FILE)
+
+        if thread_id not in data or course not in data[thread_id]:
+            await interaction.followup.send(
+                "❌ このコースに提出されたタイムは見つかりません。",
+                ephemeral=True
+            )
+            return
+
+        original_length = len(data[thread_id][course])
+
+        # 実行者のデータ削除
+        data[thread_id][course] = [
+            x for x in data[thread_id][course]
+            if x["user_id"] != user_id
+        ]
+
+        if len(data[thread_id][course]) == original_length:
+            await interaction.followup.send(
+                "❌ あなたはこのコースにタイムを提出していません。",
+                ephemeral=True
+            )
+            return
+
+        # コースが空になったら削除
+        if not data[thread_id][course]:
+            del data[thread_id][course]
+
+        save_json(SUBMIT_FILE, data)
+        trigger_submit_update(data)
+
+        await interaction.followup.send(
+            f"🗑️ **タイムを撤回しました**\n\n"
+            f"🗺️ コース: {course}",
+            ephemeral=True
+        )
