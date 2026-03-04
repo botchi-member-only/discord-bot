@@ -291,9 +291,10 @@ def setup(tree: app_commands.CommandTree):
 
         for team in teams:
 
-            thread = await message.create_thread(
+            thread = await interaction.channel.create_thread(
                 name=f"🏎️ {team['name']} 戦略会議",
-                type=discord.ChannelType.private_thread
+                type=discord.ChannelType.private_thread,
+                invitable=False
             )
 
             # メンバー招待
