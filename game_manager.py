@@ -4,7 +4,6 @@ import json
 import os
 import requests
 import random
-from itertools import groupby
 
 MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
@@ -181,21 +180,11 @@ def setup(tree: app_commands.CommandTree):
             key=lambda x: RANK_VALUE.get(x.get("level"), 0),
             reverse=True
         )
-        grouped = []
-        for rank, group in groupby(participants, key=lambda x: x["level"]):
-            g = list(group)
-            random.shuffle(g)
-            grouped.extend(g)
-        participants = grouped
 
         # 均等振り分け
         for p in participants_list:
             # 最小値を取得
             min_power = min(t["total_power"] for t in teams)
-            candidate_teams = [t for t in teams if t["total_power"] == min_power]
-            min_size = min(len(t["members"]) for t in candidate_teams)
-            candidate_teams = [t for t in candidate_teams if len(t["members"]) == min_size]
-            weakest_team = random.choice(candidate_teams)
 
             weakest_team["members"].append({
                 "display_name": p.get("name", "Unknown"),
