@@ -112,6 +112,15 @@ def setup(tree: app_commands.CommandTree):
         # レベル順に並び替え
         level_order = {"A": 0, "A-": 1, "B+": 2, "B": 3}
 
+        participants_list = list(participants.values())
+        # ★ まず全体をシャッフル（同レベル固定防止）
+        random.shuffle(participants_list)
+        # ★ その後ランク順ソート
+        participants_list.sort(
+            key=lambda x: RANK_VALUE.get(x.get("level"), 0),
+            reverse=True
+        )
+        
         sorted_participants = sorted(
             participants.values(),
             key=lambda x: level_order.get(x["level"], 99)
