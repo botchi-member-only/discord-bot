@@ -73,6 +73,36 @@ def trigger_submit_update(data):
     }
     requests.post(url, headers=headers, json=payload)
 
+async def course_autocomplete(
+    interaction: discord.Interaction,
+    current: str
+):
+    # スレッド以外では候補を出さない
+    if not isinstance(interaction.channel, discord.Thread):
+        return []
+
+    thread_data = load_json(THREAD_FILE)
+
+    if not thread_data.get("active"):
+        return []
+
+    courses = thread_data.get("courses", [])
+
+    # 入力中の文字列でフィルタ
+    filtered = [
+        c for c in courses
+        if current.lower() in c["name"].lower()
+    ]
+
+    # Discordは最大25件
+    return [
+        app_commands.Choice(
+            name=f"{c['name']} | {c['machine_label']}",
+            value=c["name"]
+        )
+        for c in filtered[:25]
+    ]
+
 
 # ==========================
 # コマンド登録
@@ -388,11 +418,13 @@ def setup(tree: app_commands.CommandTree):
         # ==========================
         save_json(THREAD_FILE, thread_save_data)
         trigger_thread_update(thread_save_data)
+        
     @tree.command(name="submittime", description="タイムを提出します")
     @app_commands.describe(
         course="コース名を選択",
         time="タイムを入力（例: 1:32.456）"
     )
+    @app_commands.autocomplete(course=course_autocomplete)
     async def submit_time(
         interaction: discord.Interaction,
         course: str,
