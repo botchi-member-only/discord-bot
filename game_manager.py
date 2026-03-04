@@ -307,10 +307,25 @@ def setup(tree: app_commands.CommandTree):
         # スレッド保存用データ
         # ==========================
 
+        from datetime import datetime
+
         thread_save_data = {
             "active": True,
+            "created_at": datetime.now().isoformat(),
+            "courses": [],
             "teams": {}
         }
+        # ==========================
+        # コース情報保存
+        # ==========================
+
+        for pair in course_machine_pairs:
+
+            thread_save_data["courses"].append({
+                "id": pair["course"]["id"],
+                "name": pair["course"]["name"],
+                "machine_label": pair["machine"]["label"]
+            })
 
         # ==========================
         # チーム戦略スレッド作成
