@@ -297,6 +297,9 @@ def setup(tree: app_commands.CommandTree):
                 invitable=False
             )
 
+            # ★ スレッド作成直後に軽く送信（表示安定用）
+            await thread.send("🟢 スレッドを作成しました。")
+
             # メンバー招待
             for member in team["members"]:
                 guild_member = interaction.guild.get_member(int(member["user_id"]))
@@ -306,7 +309,19 @@ def setup(tree: app_commands.CommandTree):
                     except:
                         pass
 
+            # ==========================
+            # ★ メンション文字列作成
+            # ==========================
+            mentions = " ".join(
+                f"<@{m['user_id']}>" for m in team["members"]
+            )
+
+            # ==========================
+            # ★ 戦略開始メッセージ送信
+            # ==========================
             await thread.send(
-                f"{team['name']} の戦略スレッドです。\n"
-                "担当コースをここで相談してください。"
+                f"{mentions}\n\n"
+                f"🏎️ **{team['name']} 戦略会議を開始します！**\n"
+                "🛣️ 担当コースをここで決定してください。\n"
+                "⏱️ タイム提出前に必ず確認を！"
             )
