@@ -8,6 +8,7 @@ import random
 MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
 COURSE_FILE = "Courses.json"
+MACHINE_FILE = "MachineConditions.json"
 
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -214,6 +215,28 @@ def setup(tree: app_commands.CommandTree):
             return
         # ★ 重複なしランダム抽選
         selected_courses = random.sample(courses_data, course_count)
+        # ==========================
+        # マシン条件読み込み
+        # ==========================
+
+        machine_data = load_json(MACHINE_FILE)
+
+        if not machine_data:
+            await interaction.followup.send("❌ マシン条件データが存在しません。")
+            return
+        course_count = max_members
+        if course_count > len(courses_data):
+            await interaction.followup.send("❌ コース数が不足しています。")
+            return
+        selected_courses = random.sample(courses_data, course_count)
+        # ★ コースごとにマシン条件をランダム決定（重複OK）
+        course_machine_pairs = []
+        for course in selected_courses:
+            machine = random.choice(machine_data)
+            course_machine_pairs.append({
+                "course": course,
+                "machine": machine
+            })
 
         for team in teams:
             diff = max_members - len(team["members"])
@@ -250,11 +273,14 @@ def setup(tree: app_commands.CommandTree):
             color=0xffcc00
         )
         course_text = ""
-        for c in selected_courses:
-            course_text += f"Course {c['id']} : {c['name']}\n"
+        for pair in course_machine_pairs:
+            course_name = pair["course"]["name"]
+            machine_label = pair["machine"]["label"]
+            course_text += f"{course_name}  |  🚗 {machine_label}\n"
         course_embed.add_field(
-            name="指定コース一覧",
+            name="指定コース & マシン条件",
             value=course_text,
             inline=False
         )
+
         await interaction.followup.send(embed=course_embed)
