@@ -11,6 +11,8 @@ GAME_FILE = "GameParticipants.json"
 COURSE_FILE = "Courses.json"
 MACHINE_FILE = "MachineConditions.json"
 THREAD_FILE = "GameThreads.json"
+SUBMIT_FILE = "SubmitTimes.json"
+RESULT_CHANNEL_ID = 1478572921461936231
 
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -51,6 +53,20 @@ def trigger_thread_update(data):
     }
     payload = {
         "event_type": "ThreadUpdate",
+        "client_payload": {
+            "data": json.dumps(data, ensure_ascii=False)
+        }
+    }
+    requests.post(url, headers=headers, json=payload)
+
+def trigger_submit_update(data):
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+    payload = {
+        "event_type": "SubmitTimeUpdate",
         "client_payload": {
             "data": json.dumps(data, ensure_ascii=False)
         }
@@ -372,3 +388,70 @@ def setup(tree: app_commands.CommandTree):
         # ==========================
         save_json(THREAD_FILE, thread_save_data)
         trigger_thread_update(thread_save_data))
+    @tree.command(name="submittime", description="タイムを提出します")
+    @app_commands.describe(
+        course="コース名を選択",
+        time="タイムを入力（例: 1:32.456）"
+    )
+    async def submit_time(
+        interaction: discord.Interaction,
+        course: str,
+        time: str
+    ):
+
+        # ① スレッドチェック
+        if not isinstance(interaction.channel, discord.Thread):
+            await interaction.response.send_message(
+                "❌ このコマンドは戦略会議スレッド内でのみ使用できます。",
+                ephemeral=True
+            )
+            return
+
+        if not interaction.channel.name.endswith("戦略会議"):
+            await interaction.response.send_message(
+                "❌ このスレッドでは使用できません。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        user_id = str(interaction.user.id)
+        user_name = interaction.user.display_name
+        thread_id = str(interaction.channel.id)
+
+        data = load_json(SUBMIT_FILE)
+
+        if thread_id not in data:
+            data[thread_id] = {}
+
+        if course not in data[thread_id]:
+            data[thread_id][course] = []
+
+        # 同一ユーザーが同一コース再提出 → 上書き
+        data[thread_id][course] = [
+            x for x in data[thread_id][course]
+            if x["user_id"] != user_id
+        ]
+
+        data[thread_id][course].append({
+            "user_id": user_id,
+            "name": user_name,
+            "time": time
+        })
+
+        save_json(SUBMIT_FILE, data)
+        trigger_submit_update(data)
+
+        # 結果チャンネルへ送信
+        result_channel = interaction.client.get_channel(RESULT_CHANNEL_ID)
+
+        if result_channel:
+            await result_channel.send(
+                f"🏁 **タイム提出**\n"
+                f"👤 {user_name}\n"
+                f"🗺️ {course}\n"
+                f"⏱️ {time}"
+            )
+
+        await interaction.followup.send("✅ タイムを提出しました。", ephemeral=True)
