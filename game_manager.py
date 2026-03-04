@@ -128,3 +128,92 @@ def setup(tree: app_commands.CommandTree):
             )
         embed.set_footer(text=f"参加人数: {len(participants)}人")
         await interaction.response.send_message(embed=embed)
+    TEAM_NAMES = ["α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ"]
+
+    RANK_VALUE = {
+        "A": 4,
+        "A-": 3,
+        "B+": 2,
+        "B": 1
+    }
+
+    @tree.command(name="GameStart", description="チームを生成してメンバーを振り分けます")
+    @app_commands.describe(team_count="作成するチーム数")
+    async def GameStart(interaction: discord.Interaction, team_count: int):
+
+        await interaction.response.defer()
+
+        # 参加者読み込み
+        try:
+            with open("GameParticipants.json", "r", encoding="utf-8") as f:
+                participants = json.load(f)
+        except:
+            await interaction.followup.send("❌ 参加者データが読み込めません。")
+            return
+
+        if not participants:
+            await interaction.followup.send("❌ 参加者がいません。")
+            return
+
+        if team_count <= 0:
+            await interaction.followup.send("❌ チーム数は1以上にしてください。")
+            return
+
+        if team_count > len(participants):
+            await interaction.followup.send("❌ チーム数が参加人数を超えています。")
+            return
+
+        # チーム初期化
+        teams = []
+        for i in range(team_count):
+            teams.append({
+                "name": f"{TEAM_NAMES[i]}チーム",
+                "members": [],
+                "total_power": 0
+            })
+
+        # 実力順ソート
+        participants.sort(
+            key=lambda x: RANK_VALUE.get(x["rank"], 0),
+            reverse=True
+        )
+
+        # 均等振り分け
+        for p in participants:
+            weakest_team = min(teams, key=lambda t: (t["total_power"], len(t["members"])))
+            weakest_team["members"].append({
+                "display_name": p["display_name"],
+                "rank": p["rank"],
+                "courses": 1
+            })
+            weakest_team["total_power"] += RANK_VALUE.get(p["rank"], 0)
+
+        # コース再調整
+        max_members = max(len(t["members"]) for t in teams)
+
+        for team in teams:
+            diff = max_members - len(team["members"])
+            if diff > 0:
+                candidates = team["members"][:]
+                random.shuffle(candidates)
+                for i in range(min(diff, len(candidates))):
+                    candidates[i]["courses"] = 2
+
+        # embed作成
+        embed = discord.Embed(
+            title="🏁 チーム振り分け結果",
+            color=0x00ffcc
+        )
+
+        for team in teams:
+            text = ""
+            for m in team["members"]:
+                text += f"{m['display_name']} ({m['rank']}) - {m['courses']}コース\n"
+
+            embed.add_field(
+                name=team["name"],
+                value=text if text else "メンバーなし",
+                inline=False
+            )
+
+        await interaction.followup.send(embed=embed)
