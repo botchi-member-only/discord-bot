@@ -3,6 +3,7 @@ from discord import app_commands
 import json
 import os
 import requests
+import random
 
 MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
