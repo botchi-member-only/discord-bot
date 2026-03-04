@@ -100,3 +100,31 @@ def setup(tree: app_commands.CommandTree):
         trigger_game_update(participants)
 
         await interaction.response.send_message("🗑️ 参加を取り消しました。")
+    @tree.command(name="gamelist", description="現在の参加者一覧を表示します")
+    async def game_list(interaction: discord.Interaction):
+
+        participants = load_json(GAME_FILE)
+
+        if not participants:
+            await interaction.response.send_message("現在の参加者はいません。")
+            return
+
+        # レベル順に並び替え
+        level_order = {"A": 0, "A-": 1, "B+": 2, "B": 3}
+
+        sorted_participants = sorted(
+            participants.values(),
+            key=lambda x: level_order.get(x["level"], 99)
+        )
+        embed = discord.Embed(
+            title="🎮 現在の参加者一覧",
+            color=0x3498db
+        )
+        for p in sorted_participants:
+            embed.add_field(
+                name=p["name"],
+                value=f"レベル: {p['level']}",
+                inline=False
+            )
+        embed.set_footer(text=f"参加人数: {len(participants)}人")
+        await interaction.response.send_message(embed=embed)
