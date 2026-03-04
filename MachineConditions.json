@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "label": "Class S 指定",
+    "type": "class",
+    "value": "S"
+  },
+  {
+    "id": 2,
+    "label": "Class A 指定",
+    "type": "class",
+    "value": "A"
+  },
+  {
+    "id": 3,
+    "label": "★3以下限定",
+    "type": "star_limit",
+    "value": 3
+  },
+  {
+    "id": 4,
+    "label": "メーカー指定: Lamborghini",
+    "type": "manufacturer",
+    "value": "Lamborghini"
+  }
+]
