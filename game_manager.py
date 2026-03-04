@@ -501,7 +501,7 @@ def setup(tree: app_commands.CommandTree):
             f"✅ **タイムを提出しました**\n\n"
             f"🗺️ コース: {course}\n"
             f"⏱️ タイム: {time}\n\n"
-            f"🎥 走行動画を運営へ提出してください。",
+            f"🎥 走行動画を運営へ提出してください。"
         )
     @tree.command(name="withdrawtime", description="提出したタイムを撤回します")
     @app_commands.describe(
