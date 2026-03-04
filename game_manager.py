@@ -280,7 +280,7 @@ def setup(tree: app_commands.CommandTree):
         for pair in course_machine_pairs:
             course_name = pair["course"]["name"]
             machine_label = pair["machine"]["label"]
-            course_text += f"{course_name}  |  🚗 {machine_label}\n"
+            course_text += f"{course_name} | {machine_label}\n"
         course_embed.add_field(
             name="指定コース & マシン条件",
             value=course_text,
