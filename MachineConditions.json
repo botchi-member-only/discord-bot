@@ -1,68 +1,36 @@
 [
-  {
-    "id": 1,
-    "label": "Class D 指定",
-    "type": "class",
-    "value": "D"
-  },
-  {
-    "id": 2,
-    "label": "Class C 指定",
-    "type": "class",
-    "value": "C"
-  },
-  {
-    "id": 3,
-    "label": "Class B 指定",
-    "type": "class",
-    "value": "B"
-  },
-  {
-    "id": 4,
-    "label": "Class A 指定",
-    "type": "class",
-    "value": "A"
-  },
-  {
-    "id": 5,
-    "label": "Class S 指定",
-    "type": "class",
-    "value": "S"
-  },
-  {
-    "id": 6,
-    "label": "★3以下限定",
-    "type": "star_limit",
-    "value": 3
-  },
-  {
-    "id": 7,
-    "label": "メーカー指定: Lamborghini",
-    "type": "manufacturer",
-    "value": "Lamborghini"
-  },
-  {
-    "id": 8,
-    "label": "メーカー指定: ASTON MARTIN",
-    "type": "manufacturer",
-    "value": "ASTON MARTIN"
-  },
-  {
-    "id": 9,
-    "label": "メーカー指定: BUGATTI",
-    "type": "manufacturer",
-    "value": "BUGATTI"
-  },
-  {
-    "id": 10,
-    "label": "メーカー指定: FERRARI",
-    "type": "manufacturer",
-    "value": "FERRARI"
-  },
-  {
-    "id": 11,
-    "label": "メーカー指定: PORSCHE",
-    "type": "manufacturer",
-    "value": "PORSCHE"
-  }
+  { "id": 1, "label": "Class D 指定", "type": "class", "value": "D" },
+  { "id": 2, "label": "Class C 指定", "type": "class", "value": "C" },
+  { "id": 3, "label": "Class B 指定", "type": "class", "value": "B" },
+  { "id": 4, "label": "Class A 指定", "type": "class", "value": "A" },
+  { "id": 5, "label": "Class S 指定", "type": "class", "value": "S" },
+
+  { "id": 6, "label": "★3以下限定", "type": "star_limit", "value": 3 },
+  { "id": 7, "label": "★4以上限定", "type": "star_min", "value": 4 },
+
+  { "id": 8, "label": "メーカー指定: Lamborghini", "type": "manufacturer", "value": "Lamborghini" },
+  { "id": 9, "label": "メーカー指定: Ferrari", "type": "manufacturer", "value": "Ferrari" },
+  { "id": 10, "label": "メーカー指定: Porsche", "type": "manufacturer", "value": "Porsche" },
+  { "id": 11, "label": "メーカー指定: Bugatti", "type": "manufacturer", "value": "Bugatti" },
+  { "id": 12, "label": "メーカー指定: Aston Martin", "type": "manufacturer", "value": "Aston Martin" },
+
+  { "id": 13, "label": "Lamborghini (A class or S class)", "type": "manufacturer_class", "value": { "manufacturer": "Lamborghini", "class": ["A", "S"] } },
+  { "id": 14, "label": "Lamborghini (B class)", "type": "manufacturer_class", "value": { "manufacturer": "Lamborghini", "class": ["B"] } },
+  { "id": 15, "label": "Lamborghini (C class or D class)", "type": "manufacturer_class", "value": { "manufacturer": "Lamborghini", "class": ["C", "D"] } },
+
+  { "id": 16, "label": "Ferrari (A class or S class)", "type": "manufacturer_class", "value": { "manufacturer": "Ferrari", "class": ["A", "S"] } },
+  { "id": 17, "label": "Ferrari (B class)", "type": "manufacturer_class", "value": { "manufacturer": "Ferrari", "class": ["B"] } },
+  { "id": 18, "label": "Ferrari (C class or D class)", "type": "manufacturer_class", "value": { "manufacturer": "Ferrari", "class": ["C", "D"] } },
+
+  { "id": 19, "label": "Porsche (A class or S class)", "type": "manufacturer_class", "value": { "manufacturer": "Porsche", "class": ["A", "S"] } },
+  { "id": 20, "label": "Porsche (B class)", "type": "manufacturer_class", "value": { "manufacturer": "Porsche", "class": ["B"] } },
+  { "id": 21, "label": "Porsche (C class or D class)", "type": "manufacturer_class", "value": { "manufacturer": "Porsche", "class": ["C", "D"] } },
+
+  { "id": 22, "label": "Bugatti (A class or S class)", "type": "manufacturer_class", "value": { "manufacturer": "Bugatti", "class": ["A", "S"] } },
+  { "id": 23, "label": "Bugatti (B class)", "type": "manufacturer_class", "value": { "manufacturer": "Bugatti", "class": ["B"] } },
+  { "id": 24, "label": "Bugatti (C class or D class)", "type": "manufacturer_class", "value": { "manufacturer": "Bugatti", "class": ["C", "D"] } },
+
+  { "id": 25, "label": "Aston Martin (A class or S class)", "type": "manufacturer_class", "value": { "manufacturer": "Aston Martin", "class": ["A", "S"] } },
+  { "id": 26, "label": "Aston Martin (B class)", "type": "manufacturer_class", "value": { "manufacturer": "Aston Martin", "class": ["B"] } },
+  { "id": 27, "label": "Aston Martin (C class or D class)", "type": "manufacturer_class", "value": { "manufacturer": "Aston Martin", "class": ["C", "D"] } }
 ]
