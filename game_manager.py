@@ -200,12 +200,18 @@ def setup(tree: app_commands.CommandTree):
         # コース再調整
         max_members = max(len(t["members"]) for t in teams)
         # ==========================
-        # コース生成
+        # コース読み込み
         # ==========================
-        course_count = max_members  # 最多チーム人数に合わせる
-        # ★ 将来的にここを書き換えれば本物のコース名にできる
-        COURSE_LIST = [f"コース{i+1}" for i in range(200)]
-        selected_courses = COURSE_LIST[:course_count]
+        COURSE_FILE = "Courses.json"
+        courses_data = load_json(COURSE_FILE)
+        if not courses_data:
+            await interaction.followup.send("❌ コースデータが存在しません。")
+            return
+        course_count = max_members
+        if course_count > len(courses_data):
+            await interaction.followup.send("❌ コース数が不足しています。")
+            return
+        selected_courses = courses_data[:course_count]
 
         for team in teams:
             diff = max_members - len(team["members"])
@@ -243,7 +249,7 @@ def setup(tree: app_commands.CommandTree):
         )
         course_text = ""
         for c in selected_courses:
-            course_text += f"{c}\n"
+            course_text += f"Course {c['id']} : {c['name']}\n"
         course_embed.add_field(
             name="指定コース一覧",
             value=course_text,
