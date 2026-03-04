@@ -1,14 +1,26 @@
 [
   {
     "id": 1,
-    "name": "コース1"
+    "name": "ROME - SAINT PETER'S KICKOFF"
   },
   {
     "id": 2,
-    "name": "コース2"
+    "name": "ROME - THE ETERNAL CITY"
   },
   {
     "id": 3,
-    "name": "コース3"
+    "name": "ROME - TIBER STREAM"
+  },
+  {
+    "id": 4,
+    "name": "ROME - CAPTAL OF THE WORLD"
+  },
+  {
+    "id": 5,
+    "name": "ROME - PANTHEON SPLIT"
+  },
+  {
+    "id": 6,
+    "name": "ROME - ANCIENT ROME"
   }
 ]
