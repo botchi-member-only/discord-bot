@@ -7,6 +7,7 @@ import random
 
 MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
+COURSE_FILE = "Courses.json"
 
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
