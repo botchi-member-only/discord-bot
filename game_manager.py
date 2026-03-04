@@ -387,7 +387,7 @@ def setup(tree: app_commands.CommandTree):
         # JSON保存 & GitHub反映
         # ==========================
         save_json(THREAD_FILE, thread_save_data)
-        trigger_thread_update(thread_save_data))
+        trigger_thread_update(thread_save_data)
     @tree.command(name="submittime", description="タイムを提出します")
     @app_commands.describe(
         course="コース名を選択",
