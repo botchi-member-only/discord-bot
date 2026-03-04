@@ -4,11 +4,13 @@ import json
 import os
 import requests
 import random
+from datetime import datetime
 
 MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
 COURSE_FILE = "Courses.json"
 MACHINE_FILE = "MachineConditions.json"
+THREAD_FILE = "GameThreads.json"
 
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -35,6 +37,20 @@ def trigger_game_update(data):
     }
     payload = {
         "event_type": "GameUpdate",
+        "client_payload": {
+            "data": json.dumps(data, ensure_ascii=False)
+        }
+    }
+    requests.post(url, headers=headers, json=payload)
+
+def trigger_thread_update(data):
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+    payload = {
+        "event_type": "ThreadUpdate",
         "client_payload": {
             "data": json.dumps(data, ensure_ascii=False)
         }
@@ -287,7 +303,15 @@ def setup(tree: app_commands.CommandTree):
             inline=False
         )
         await interaction.followup.send(embed=course_embed)
-        #message = await interaction.followup.send(embed=embed)
+        # ==========================
+        # スレッド保存用データ
+        # ==========================
+
+        thread_save_data = {
+            "active": True,
+            "teams": {}
+        }
+
         # ==========================
         # チーム戦略スレッド作成
         # ==========================
@@ -300,7 +324,7 @@ def setup(tree: app_commands.CommandTree):
                 invitable=False
             )
 
-            # ★ スレッド作成直後に軽く送信（表示安定用）
+            # ★ 表示安定用
             await thread.send("🟢 スレッドを作成しました。")
 
             # メンバー招待
@@ -312,19 +336,24 @@ def setup(tree: app_commands.CommandTree):
                     except:
                         pass
 
-            # ==========================
-            # ★ メンション文字列作成
-            # ==========================
+            # メンション文字列作成
             mentions = " ".join(
                 f"<@{m['user_id']}>" for m in team["members"]
             )
 
-            # ==========================
-            # ★ 戦略開始メッセージ送信
-            # ==========================
+            # 戦略開始メッセージ
             await thread.send(
                 f"{mentions}\n\n"
                 f"🏎️ **{team['name']} 戦略会議を開始します！**\n"
                 "🛣️ 担当コースをここで決定してください。\n"
                 "⏱️ タイム提出前に必ず確認を！"
             )
+            # ★ スレッドID保存
+            thread_save_data["teams"][team["name"]] = {
+                "thread_id": str(thread.id)
+            }
+        # ==========================
+        # JSON保存 & GitHub反映
+        # ==========================
+        save_json(THREAD_FILE, thread_save_data)
+        trigger_thread_update(thread_save_data))
