@@ -490,15 +490,19 @@ def setup(tree: app_commands.CommandTree):
         result_channel = interaction.client.get_channel(RESULT_CHANNEL_ID)
 
         if result_channel:
-            await interaction.followup.send(
-                f"✅ **タイムを提出しました**\n\n"
-                f"🗺️ コース: {course}\n"
-                f"⏱️ タイム: {time}\n\n"
-                f"🎥 走行動画を運営へ提出してください。",
-                ephemeral=True
+            await result_channel.send(
+                f"🏁 **タイム提出**\n"
+                f"👤 {user_name}\n"
+                f"🗺️ {course}\n"
+                f"⏱️ {time}"
             )
 
-        await interaction.followup.send("✅ タイムを提出しました。", ephemeral=True)
+        await interaction.followup.send(
+            f"✅ **タイムを提出しました**\n\n"
+            f"🗺️ コース: {course}\n"
+            f"⏱️ タイム: {time}\n\n"
+            f"🎥 走行動画を運営へ提出してください。",
+        )
     @tree.command(name="withdrawtime", description="提出したタイムを撤回します")
     @app_commands.describe(
         course="撤回するコースを選択"
