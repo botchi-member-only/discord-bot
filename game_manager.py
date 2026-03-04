@@ -173,20 +173,25 @@ def setup(tree: app_commands.CommandTree):
             })
 
         # 実力順ソート
-        participants.sort(
-            key=lambda x: RANK_VALUE.get(x["rank"], 0),
+        participants_list = list(participants.values())
+
+        participants_list.sort(
+            key=lambda x: RANK_VALUE.get(x.get("rank"), 0),
             reverse=True
         )
 
         # 均等振り分け
-        for p in participants:
-            weakest_team = min(teams, key=lambda t: (t["total_power"], len(t["members"])))
+        for p in participants_list:
+            weakest_team = min(
+                teams,
+                key=lambda t: (t["total_power"], len(t["members"]))
+            )
             weakest_team["members"].append({
-                "display_name": p["display_name"],
-                "rank": p["rank"],
+                "display_name": p.get("display_name", "Unknown"),
+                "rank": p.get("rank", "?"),
                 "courses": 1
             })
-            weakest_team["total_power"] += RANK_VALUE.get(p["rank"], 0)
+            weakest_team["total_power"] += RANK_VALUE.get(p.get("rank"), 0)
 
         # コース再調整
         max_members = max(len(t["members"]) for t in teams)
