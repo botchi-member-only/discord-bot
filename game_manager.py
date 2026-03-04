@@ -286,8 +286,8 @@ def setup(tree: app_commands.CommandTree):
             value=course_text,
             inline=False
         )
-
-        message = await interaction.followup.send(embed=embed)
+        await interaction.followup.send(embed=course_embed)
+        #message = await interaction.followup.send(embed=embed)
         # ==========================
         # チーム戦略スレッド作成
         # ==========================
