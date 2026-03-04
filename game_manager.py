@@ -176,7 +176,7 @@ def setup(tree: app_commands.CommandTree):
         participants_list = list(participants.values())
 
         participants_list.sort(
-            key=lambda x: RANK_VALUE.get(x.get("rank"), 0),
+            key=lambda x: RANK_VALUE.get(x.get("level"), 0),
             reverse=True
         )
 
@@ -187,11 +187,11 @@ def setup(tree: app_commands.CommandTree):
                 key=lambda t: (t["total_power"], len(t["members"]))
             )
             weakest_team["members"].append({
-                "display_name": p.get("display_name", "Unknown"),
-                "rank": p.get("rank", "?"),
+                "display_name": p.get("name", "Unknown"),
+                "rank": p.get("level", "?"),
                 "courses": 1
             })
-            weakest_team["total_power"] += RANK_VALUE.get(p.get("rank"), 0)
+            weakest_team["total_power"] += RANK_VALUE.get(p.get("level"), 0)
 
         # コース再調整
         max_members = max(len(t["members"]) for t in teams)
@@ -213,7 +213,7 @@ def setup(tree: app_commands.CommandTree):
         for team in teams:
             text = ""
             for m in team["members"]:
-                text += f"{m['display_name']} ({m['rank']}) - {m['courses']}コース\n"
+                text += f"{m['name']} ({m['level']}) - {m['courses']}コース\n"
 
             embed.add_field(
                 name=team["name"],
