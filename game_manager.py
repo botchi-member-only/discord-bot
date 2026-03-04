@@ -200,18 +200,19 @@ def setup(tree: app_commands.CommandTree):
         # コース再調整
         max_members = max(len(t["members"]) for t in teams)
         # ==========================
-        # コース読み込み
+        # コース読み込み（ランダム抽選）
         # ==========================
-        COURSE_FILE = "Courses.json"
         courses_data = load_json(COURSE_FILE)
         if not courses_data:
             await interaction.followup.send("❌ コースデータが存在しません。")
             return
         course_count = max_members
+
         if course_count > len(courses_data):
             await interaction.followup.send("❌ コース数が不足しています。")
             return
-        selected_courses = courses_data[:course_count]
+        # ★ 重複なしランダム抽選
+        selected_courses = random.sample(courses_data, course_count)
 
         for team in teams:
             diff = max_members - len(team["members"])
