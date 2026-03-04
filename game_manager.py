@@ -176,7 +176,10 @@ def setup(tree: app_commands.CommandTree):
             })
 
         # 実力順ソート
-        participants_list = list(participants.values())
+        participants_list = [
+            {"user_id": uid, **data}
+            for uid, data in participants.items()
+        ]
         # ★ まず全体をシャッフル（同レベル固定防止）
         random.shuffle(participants_list)
         # ★ その後ランク順ソート
