@@ -1,26 +1,68 @@
 [
   {
     "id": 1,
-    "label": "Class S 指定",
+    "label": "Class D 指定",
     "type": "class",
-    "value": "S"
+    "value": "D"
   },
   {
     "id": 2,
+    "label": "Class C 指定",
+    "type": "class",
+    "value": "C"
+  },
+  {
+    "id": 3,
+    "label": "Class B 指定",
+    "type": "class",
+    "value": "B"
+  },
+  {
+    "id": 4,
     "label": "Class A 指定",
     "type": "class",
     "value": "A"
   },
   {
-    "id": 3,
+    "id": 5,
+    "label": "Class S 指定",
+    "type": "class",
+    "value": "S"
+  },
+  {
+    "id": 6,
     "label": "★3以下限定",
     "type": "star_limit",
     "value": 3
   },
   {
-    "id": 4,
+    "id": 7,
     "label": "メーカー指定: Lamborghini",
     "type": "manufacturer",
     "value": "Lamborghini"
+  },
+  {
+    "id": 8,
+    "label": "メーカー指定: ASTON MARTIN",
+    "type": "manufacturer",
+    "value": "ASTON MARTIN"
+  },
+  {
+    "id": 9,
+    "label": "メーカー指定: BUGATTI",
+    "type": "manufacturer",
+    "value": "BUGATTI"
+  },
+  {
+    "id": 10,
+    "label": "メーカー指定: FERRARI",
+    "type": "manufacturer",
+    "value": "FERRARI"
+  },
+  {
+    "id": 11,
+    "label": "メーカー指定: PORSCHE",
+    "type": "manufacturer",
+    "value": "PORSCHE"
   }
 ]
