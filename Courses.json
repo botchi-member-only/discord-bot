@@ -22,5 +22,29 @@
   {
     "id": 6,
     "name": "ROME - ANCIENT ROME"
-  }
+  },
+  {
+    "id": 7,
+    "name": "SAN FRANCISCO - STREETS OF SAN FRANCISCO"
+  },
+  {
+    "id": 8,
+    "name": "SAN FRANCISCO - THE CITY BY THE BAY"
+  },
+  {
+    "id":9,
+    "name": "SAN FRANCISCO - ROLLER COASTER RIDEY"
+  },
+  {
+    "id":10,
+    "name": "SAN FRANCISCO - DOWNTOWN RISE"
+  },
+  {
+    "id":11,
+    "name": "SAN FRANCISCO - RUSH MINUTE"
+  },
+  {
+    "id":12,
+    "name": "SAN FRANCISCO - TUNNEL JAM"
+  },
 ]
