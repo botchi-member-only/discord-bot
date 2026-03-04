@@ -199,6 +199,13 @@ def setup(tree: app_commands.CommandTree):
 
         # コース再調整
         max_members = max(len(t["members"]) for t in teams)
+        # ==========================
+        # コース生成
+        # ==========================
+        course_count = max_members  # 最多チーム人数に合わせる
+        # ★ 将来的にここを書き換えれば本物のコース名にできる
+        COURSE_LIST = [f"コース{i+1}" for i in range(200)]
+        selected_courses = COURSE_LIST[:course_count]
 
         for team in teams:
             diff = max_members - len(team["members"])
@@ -226,3 +233,20 @@ def setup(tree: app_commands.CommandTree):
             )
 
         await interaction.followup.send(embed=embed)
+        # ==========================
+        # コース発表Embed
+        # ==========================
+        course_embed = discord.Embed(
+            title="🛣️ 今回の指定コース",
+            description="各チームで走行担当を決めてください。",
+            color=0xffcc00
+        )
+        course_text = ""
+        for c in selected_courses:
+            course_text += f"{c}\n"
+        course_embed.add_field(
+            name="指定コース一覧",
+            value=course_text,
+            inline=False
+        )
+        await interaction.followup.send(embed=course_embed)
