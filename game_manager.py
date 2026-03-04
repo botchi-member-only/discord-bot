@@ -193,9 +193,10 @@ def setup(tree: app_commands.CommandTree):
             )
 
             weakest_team["members"].append({
-                "display_name": p.get("name", "Unknown"),
-                "rank": p.get("level", "?"),
-                "courses": 1
+            "user_id": p.get("user_id"),
+            "display_name": p.get("name", "Unknown"),
+            "rank": p.get("level", "?"),
+            "courses": 1
             })
             weakest_team["total_power"] += RANK_VALUE.get(p.get("level"), 0)
 
@@ -283,4 +284,28 @@ def setup(tree: app_commands.CommandTree):
             inline=False
         )
 
-        await interaction.followup.send(embed=course_embed)
+        message = await interaction.followup.send(embed=embed)
+        # ==========================
+        # チーム戦略スレッド作成
+        # ==========================
+
+        for team in teams:
+
+            thread = await message.create_thread(
+                name=f"🏎️ {team['name']} 戦略会議",
+                type=discord.ChannelType.private_thread
+            )
+
+            # メンバー招待
+            for member in team["members"]:
+                guild_member = interaction.guild.get_member(int(member["user_id"]))
+                if guild_member:
+                    try:
+                        await thread.add_user(guild_member)
+                    except:
+                        pass
+
+            await thread.send(
+                f"{team['name']} の戦略スレッドです。\n"
+                "担当コースをここで相談してください。"
+            )
