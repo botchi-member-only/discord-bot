@@ -186,6 +186,7 @@ def setup(tree: app_commands.CommandTree):
                 teams,
                 key=lambda t: (t["total_power"], len(t["members"]))
             )
+
             weakest_team["members"].append({
                 "display_name": p.get("name", "Unknown"),
                 "rank": p.get("level", "?"),
@@ -213,7 +214,7 @@ def setup(tree: app_commands.CommandTree):
         for team in teams:
             text = ""
             for m in team["members"]:
-                text += f"{m['name']} ({m['level']}) - {m['courses']}コース\n"
+                text += f"{m['display_name']} ({m['rank']}) - {m['courses']}コース\n"
 
             embed.add_field(
                 name=team["name"],
