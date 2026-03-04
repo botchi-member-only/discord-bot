@@ -137,7 +137,7 @@ def setup(tree: app_commands.CommandTree):
         "B": 1
     }
 
-    @tree.command(name="GameStart", description="チームを生成してメンバーを振り分けます")
+    @tree.command(name="gamestart", description="チームを生成してメンバーを振り分けます")
     @app_commands.describe(team_count="作成するチーム数")
     async def GameStart(interaction: discord.Interaction, team_count: int):
 
