@@ -459,7 +459,7 @@ def setup(tree: app_commands.CommandTree):
             )
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=False)
 
         user_id = str(interaction.user.id)
         user_name = interaction.user.display_name
@@ -592,7 +592,7 @@ def setup(tree: app_commands.CommandTree):
             )
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=ephemeral)
 
         thread_data = load_json(THREAD_FILE)
         submit_data = load_json(SUBMIT_FILE)
@@ -634,4 +634,73 @@ def setup(tree: app_commands.CommandTree):
                 inline=False
             )
 
+        await interaction.followup.send(embed=embed, ephemeral=ephemeral)
+        
+    @tree.command(name="myteamstatus", description="【チーム専用】自分のチームのタイム提出状況を表示します")
+    @app_commands.describe(
+        ephemeral="自分だけに表示するか（true / false）"
+    )
+    async def my_time_status(interaction: discord.Interaction, ephemeral: bool):
+
+        # スレッド内チェック
+        if not isinstance(interaction.channel, discord.Thread):
+            await interaction.response.send_message(
+                "❌ このコマンドは戦略会議スレッド内でのみ使用できます。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=ephemeral)
+
+        user_id = str(interaction.user.id)
+        thread_id = str(interaction.channel.id)
+
+        thread_data = load_json(THREAD_FILE)
+        submit_data = load_json(SUBMIT_FILE)
+
+        if not thread_data.get("active"):
+            await interaction.followup.send("❌ 現在アクティブな試合がありません。", ephemeral=True)
+            return
+
+        # このスレッドがどのチームか特定
+        team_name = None
+        for t_name, t_info in thread_data.get("teams", {}).items():
+            if t_info["thread_id"] == thread_id:
+                team_name = t_name
+                break
+
+        if team_name is None:
+            await interaction.followup.send(
+                "❌ このスレッドはチームスレッドではありません。",
+                ephemeral=True
+            )
+            return
+
+        courses = thread_data.get("courses", [])
+        team_submit = submit_data.get(thread_id, {})
+
+        embed = discord.Embed(
+            title=f"📊 {team_name} タイム提出状況",
+            color=0x3498db
+        )
+
+        text = ""
+        for c in courses:
+            course_name = c["name"]
+
+            if course_name in team_submit and team_submit[course_name]:
+                for entry in team_submit[course_name]:
+                    uid = entry["user_id"]
+                    text += f"🗺️ {course_name}\n"
+                    text += f"　👤 <@{uid}>\n"
+                    text += f"　⏱️ {entry['time']}\n"
+            else:
+                text += f"🗺️ {course_name}\n　❌ 未提出\n"
+
+            text += "\n"
+        embed.add_field(
+            name="提出状況",
+            value=text if text else "データなし",
+            inline=False
+        )
         await interaction.followup.send(embed=embed, ephemeral=ephemeral)
