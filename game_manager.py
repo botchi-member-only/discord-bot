@@ -455,19 +455,7 @@ def setup(tree: app_commands.CommandTree):
         course: str,
         time: str
     ):
-        thread_data = load_json(THREAD_FILE)
-        valid_thread_ids = [
-            v["thread_id"]
-            for v in thread_data.get("teams", {}).values()
-        ]
-
-        if str(interaction.channel.id) not in valid_thread_ids:
-            await interaction.response.send_message(
-                "❌ このスレッドでは使用できません。",
-                ephemeral=True
-            )
-            return
-        # ① スレッドチェック
+        # ① Threadかどうか
         if not isinstance(interaction.channel, discord.Thread):
             await interaction.response.send_message(
                 "❌ このコマンドは戦略会議スレッド内でのみ使用できます。",
@@ -475,14 +463,28 @@ def setup(tree: app_commands.CommandTree):
             )
             return
 
-        if not interaction.channel.name.endswith("戦略会議"):
+        # ② GameThreads.json 読み込み
+        thread_data = load_json(THREAD_FILE)
+
+        teams = thread_data.get("teams", {})
+
+        # ③ このスレッドがチームスレッドか判定
+        team_name = None
+        for name, info in teams.items():
+            if info["thread_id"] == str(interaction.channel.id):
+                team_name = name
+                break
+
+        if team_name is None:
             await interaction.response.send_message(
-                "❌ このスレッドでは使用できません。",
+                "❌ このスレッドはチームスレッドではありません。",
                 ephemeral=True
             )
             return
 
         await interaction.response.defer(ephemeral=False)
+
+        # ここからタイム保存処理へ…
 
         user_id = str(interaction.user.id)
         user_name = interaction.user.display_name
@@ -540,7 +542,7 @@ def setup(tree: app_commands.CommandTree):
         course: str
     ):
 
-        # スレッドチェック
+        # ① Threadかどうか
         if not isinstance(interaction.channel, discord.Thread):
             await interaction.response.send_message(
                 "❌ このコマンドは戦略会議スレッド内でのみ使用できます。",
@@ -548,20 +550,26 @@ def setup(tree: app_commands.CommandTree):
             )
             return
 
+        # ② GameThreads.json 読み込み
         thread_data = load_json(THREAD_FILE)
-        valid_thread_ids = [
-            v["thread_id"]
-            for v in thread_data.get("teams", {}).values()
-        ]
 
-        if str(interaction.channel.id) not in valid_thread_ids:
+        teams = thread_data.get("teams", {})
+
+        # ③ このスレッドがチームスレッドか判定
+        team_name = None
+        for name, info in teams.items():
+            if info["thread_id"] == str(interaction.channel.id):
+                team_name = name
+                break
+
+        if team_name is None:
             await interaction.response.send_message(
-                "❌ このスレッドでは使用できません。",
+                "❌ このスレッドはチームスレッドではありません。",
                 ephemeral=True
             )
             return
 
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=False)
 
         user_id = str(interaction.user.id)
         thread_id = str(interaction.channel.id)
@@ -666,7 +674,7 @@ def setup(tree: app_commands.CommandTree):
     )
     async def my_time_status(interaction: discord.Interaction, ephemeral: bool):
 
-        # スレッド内チェック
+        # ① Threadかどうか
         if not isinstance(interaction.channel, discord.Thread):
             await interaction.response.send_message(
                 "❌ このコマンドは戦略会議スレッド内でのみ使用できます。",
@@ -674,7 +682,26 @@ def setup(tree: app_commands.CommandTree):
             )
             return
 
-        await interaction.response.defer(ephemeral=ephemeral)
+        # ② GameThreads.json 読み込み
+        thread_data = load_json(THREAD_FILE)
+
+        teams = thread_data.get("teams", {})
+
+        # ③ このスレッドがチームスレッドか判定
+        team_name = None
+        for name, info in teams.items():
+            if info["thread_id"] == str(interaction.channel.id):
+                team_name = name
+                break
+
+        if team_name is None:
+            await interaction.response.send_message(
+                "❌ このスレッドはチームスレッドではありません。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=False)
 
         user_id = str(interaction.user.id)
         thread_id = str(interaction.channel.id)
