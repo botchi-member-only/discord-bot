@@ -43,6 +43,21 @@ def trigger_game_update(data):
     }
     requests.post(url, headers=headers, json=payload)
 
+def trigger_game_state_update(data):
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+    payload = {
+        "event_type": "GameUpdateState",
+        "client_payload": {
+            "data": json.dumps(data, ensure_ascii=False)
+        }
+    }
+    requests.post(url, headers=headers, json=payload)
+
+
 def is_admin(interaction: discord.Interaction):
     return interaction.user.guild_permissions.administrator
 
@@ -361,4 +376,4 @@ def setup(tree: app_commands.CommandTree):
         # JSON保存 & GitHub反映
         # ==========================
         save_json(GAMESTATE_FILE, game_state)
-        trigger_game_update(game_state))
+        trigger_game_state_update(game_state))
