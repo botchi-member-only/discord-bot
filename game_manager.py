@@ -580,8 +580,10 @@ def setup(tree: app_commands.CommandTree):
         )
         
     @tree.command(name="timestatus", description="【管理者専用】各チームのタイム提出状況を表示します")
-    async def time_status(interaction: discord.Interaction):
-
+    @app_commands.describe(
+        ephemeral="自分だけに表示するか（true / false）"
+    )
+    async def time_status(interaction: discord.Interaction, ephemeral: bool):
         # 管理者チェック
         if not is_admin(interaction):
             await interaction.response.send_message(
@@ -617,8 +619,9 @@ def setup(tree: app_commands.CommandTree):
 
                 if course_name in team_submit and team_submit[course_name]:
                     for entry in team_submit[course_name]:
+                        user_id = entry["user_id"]
                         text += f"🗺️ {course_name}\n"
-                        text += f"　👤 {entry['name']}\n"
+                        text += f"　👤 <@{user_id}>\n"
                         text += f"　⏱️ {entry['time']}\n"
                 else:
                     text += f"🗺️ {course_name}\n　❌ 未提出\n"
@@ -631,4 +634,4 @@ def setup(tree: app_commands.CommandTree):
                 inline=False
             )
 
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.followup.send(embed=embed, ephemeral=ephemeral)
