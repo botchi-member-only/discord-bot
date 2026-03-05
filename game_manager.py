@@ -131,6 +131,18 @@ def setup(tree: app_commands.CommandTree):
                 )
                 return
 
+        # ==========================
+        # 自分の同一コース記録があれば削除（上書き処理）
+        # ==========================
+        records["records"] = [
+            r for r in records["records"]
+            if not (
+                r["team"] == team_name and
+                r["course_id"] == selected_course["id"] and
+                r["user_id"] == user_id
+            )
+        ]
+
         record = {
             "team": team_name,
             "user_id": user_id,
