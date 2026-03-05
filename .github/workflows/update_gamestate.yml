@@ -1,8 +1,8 @@
-name: Update GameThreads.json
+name: Update GameState.json
 
 on:
   repository_dispatch:
-    types: [ThreadUpdate]
+    types: [GameUpdate]
 
 permissions:
   contents: write
@@ -20,12 +20,12 @@ jobs:
           git config user.name "GameBot"
           git config user.email "gamebot@example.com"
 
-      - name: Update GameThreads.json
+      - name: Update GameState.json
         run: |
-          echo '${{ github.event.client_payload.data }}' > GameThreads.json
+          echo '${{ github.event.client_payload.data }}' > GameState.json
 
       - name: Commit and push
         run: |
-          git add GameThreads.json
-          git commit -m "Update GameThreads.json (auto-save)"
+          git add GameState.json
+          git commit -m "Update GameState.json (auto-save)"
           git push
