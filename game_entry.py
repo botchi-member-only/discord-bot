@@ -43,20 +43,19 @@ def trigger_game_update(data):
     }
     requests.post(url, headers=headers, json=payload)
 
-def trigger_thread_update(data):
+def trigger_game_update(data):
     url = f"https://api.github.com/repos/{REPO}/dispatches"
     headers = {
         "Accept": "application/vnd.github+json",
         "Authorization": f"token {GITHUB_TOKEN}"
     }
     payload = {
-        "event_type": "ThreadUpdate",
+        "event_type": "GameUpdate",
         "client_payload": {
             "data": json.dumps(data, ensure_ascii=False)
         }
     }
     requests.post(url, headers=headers, json=payload)
-
 
 def is_admin(interaction: discord.Interaction):
     return interaction.user.guild_permissions.administrator
