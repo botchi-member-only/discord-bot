@@ -561,7 +561,7 @@ def setup(tree: app_commands.CommandTree):
             if info["thread_id"] == str(interaction.channel.id):
                 team_name = name
                 break
-
+        
         if team_name is None:
             await interaction.response.send_message(
                 "❌ このスレッドはチームスレッドではありません。",
@@ -693,7 +693,7 @@ def setup(tree: app_commands.CommandTree):
             if info["thread_id"] == str(interaction.channel.id):
                 team_name = name
                 break
-
+        
         if team_name is None:
             await interaction.response.send_message(
                 "❌ このスレッドはチームスレッドではありません。",
