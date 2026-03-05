@@ -376,4 +376,4 @@ def setup(tree: app_commands.CommandTree):
         # JSON保存 & GitHub反映
         # ==========================
         save_json(GAMESTATE_FILE, game_state)
-        trigger_game_state_update(game_state))
+        trigger_game_state_update(game_state)
