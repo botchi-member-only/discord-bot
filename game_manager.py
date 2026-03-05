@@ -409,7 +409,14 @@ def setup(tree: app_commands.CommandTree):
                 f"{mentions}\n\n"
                 f"🏎️ **{team['name']} 戦略会議を開始します！**\n"
                 "🛣️ 担当コースをここで決定してください。\n"
-                "⏱️ タイム提出前に必ず確認を！"
+                "⏱️ タイム提出前に必ず確認を！\n\n"
+                "## このチャンネルの使い方/n"
+                "だれがどのコースを走るか決めよう！/n"
+                "-# 名前の横にコース数も書いてあるのでチェック/n"
+                "走行タイムを``/submittime``コマンドで送ろう！/n"
+                "タイムを修正するときは``/submittime``タイムを削除するときは``/withdrawtime``だ/n"
+                "-# 走るコースを変えるときは必ず``/withdrawtime``してくれ/n"
+                "``myteamstatus``で自分のチームの状況を確認できるぞ/n"
             )
             # ★ スレッドID保存
             thread_save_data["teams"][team["name"]] = {
@@ -704,3 +711,77 @@ def setup(tree: app_commands.CommandTree):
             inline=False
         )
         await interaction.followup.send(embed=embed, ephemeral=ephemeral)
+
+    @tree.command(name="edittime", description="【管理者専用】指定ユーザーのタイムを修正します")
+    @app_commands.describe(
+        user="修正するユーザー",
+        course="コースを選択",
+        time="新しいタイム（例: 1:32.456）"
+    )
+    @app_commands.autocomplete(course=course_autocomplete)
+    async def edit_time(
+        interaction: discord.Interaction,
+        user: discord.User,
+        course: str,
+        time: str
+    ):
+
+        # 管理者チェック
+        if not is_admin(interaction):
+            await interaction.response.send_message(
+                "❌ このコマンドは管理者のみ使用できます。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=False)
+
+        target_user_id = str(user.id)
+        data = load_json(SUBMIT_FILE)
+
+        found = False
+        found_thread = None
+
+        # 全スレッドを探索
+        for thread_id, thread_courses in data.items():
+            if course not in thread_courses:
+                continue
+
+            for entry in thread_courses[course]:
+                if entry["user_id"] == target_user_id:
+                    entry["time"] = time
+                    found = True
+                    found_thread = thread_id
+                    break
+
+            if found:
+                break
+
+        if not found:
+            await interaction.followup.send(
+                "❌ 指定されたユーザーの該当コースのタイムが見つかりません。",
+                ephemeral=True
+            )
+            return
+
+        save_json(SUBMIT_FILE, data)
+        trigger_submit_update(data)
+
+        # 結果チャンネルへ送信
+        result_channel = interaction.client.get_channel(RESULT_CHANNEL_ID)
+
+        if result_channel:
+            await result_channel.send(
+                f"🏁 **タイム提出**\n"
+                f"👤 {user_name}\n"
+                f"🗺️ {course}\n"
+                f"⏱️ {time}"
+            )
+
+        await interaction.followup.send(
+            f"✏️ **タイムを修正しました**\n\n"
+            f"👤 ユーザー: <@{target_user_id}>\n"
+            f"🗺️ コース: {course}\n"
+            f"⏱️ 新タイム: {time}",
+            ephemeral=False
+        )
