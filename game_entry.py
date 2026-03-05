@@ -76,6 +76,45 @@ def trigger_time_record_update(data):
 def is_admin(interaction: discord.Interaction):
     return interaction.user.guild_permissions.administrator
 
+# ==========================
+# Reset 確認用 View
+# ==========================
+
+TIME_NOTIFY_CHANNEL_ID = 1478572921461936231
+
+
+class ResetConfirmView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=30)
+
+    @discord.ui.button(label="✅ 実行する", style=discord.ButtonStyle.danger)
+    async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+
+        empty_records = {"records": []}
+
+        save_json(TIMERECORD_FILE, empty_records)
+        trigger_time_record_update(empty_records)
+
+        # ===== 通知チャンネルへ送信 =====
+        channel = interaction.client.get_channel(TIME_NOTIFY_CHANNEL_ID)
+        if channel:
+            await channel.send(
+                f"🗑️ **TimeRecords.json が初期化されました。**\n"
+                f"実行者：{interaction.user.mention}"
+            )
+
+        await interaction.response.edit_message(
+            content="🗑️ TimeRecords.json を初期化しました。",
+            view=None
+        )
+
+    @discord.ui.button(label="❌ キャンセル", style=discord.ButtonStyle.secondary)
+    async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(
+            content="キャンセルしました。",
+            view=None
+        )
+
 
 # ==========================
 # コマンド登録
@@ -393,11 +432,22 @@ def setup(tree: app_commands.CommandTree):
         save_json(GAMESTATE_FILE, game_state)
         trigger_game_state_update(game_state)
 
-        # ==========================
-        # TimeRecords.json 初期化
-        # ==========================
-        empty_records = {
-            "records": []
-        }
-        save_json(TIMERECORD_FILE, empty_records)
-        trigger_time_record_update(empty_records)
+    @tree.command(name="reset", description="タイム記録(TimeRecords.json)を初期化します")
+    async def reset_command(interaction: discord.Interaction):
+
+        # 管理者チェック
+        if not is_admin(interaction):
+            await interaction.response.send_message(
+                "❌ このコマンドは管理者専用です。",
+                ephemeral=True
+            )
+            return
+
+        view = ResetConfirmView()
+
+        await interaction.response.send_message(
+            "⚠️ **TimeRecords.json を初期化します。よろしいですか？**\n"
+            "この操作は取り消せません。",
+            view=view,
+            ephemeral=True
+        )
