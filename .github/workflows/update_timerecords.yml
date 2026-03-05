@@ -1,0 +1,31 @@
+name: Update TimeRecords.json
+
+on:
+  repository_dispatch:
+    types: [TimeRecordUpdate]
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "GameBot"
+          git config user.email "gamebot@example.com"
+
+      - name: Update TimeRecords.json
+        run: |
+          echo '${{ github.event.client_payload.data }}' > TimeRecords.json
+
+      - name: Commit and push
+        run: |
+          git add TimeRecords.json
+          git commit -m "Update TimeRecords.json (auto-save)"
+          git push
