@@ -467,6 +467,10 @@ def setup(tree: app_commands.CommandTree):
         thread_data = load_json(THREAD_FILE)
 
         teams = thread_data.get("teams", {})
+        await interaction.response.send_message(
+            f"{teams}"
+        )
+        return
 
         # ③ このスレッドがチームスレッドか判定
         team_name = None
