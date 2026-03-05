@@ -102,6 +102,8 @@ async def course_autocomplete(
         )
         for c in filtered[:25]
     ]
+def is_admin(interaction: discord.Interaction):
+    return interaction.user.guild_permissions.administrator
 
 
 # ==========================
@@ -501,7 +503,8 @@ def setup(tree: app_commands.CommandTree):
             f"✅ **タイムを提出しました**\n\n"
             f"🗺️ コース: {course}\n"
             f"⏱️ タイム: {time}\n\n"
-            f"🎥 走行動画を運営へ提出してください。"
+            f"🎥 走行動画を運営へ提出してください。",
+            ephemeral=False
         )
     @tree.command(name="withdrawtime", description="提出したタイムを撤回します")
     @app_commands.describe(
@@ -573,5 +576,59 @@ def setup(tree: app_commands.CommandTree):
         await interaction.followup.send(
             f"🗑️ **タイムを撤回しました**\n\n"
             f"🗺️ コース: {course}",
-            ephemeral=True
+            ephemeral=False
         )
+        
+    @tree.command(name="timestatus", description="【管理者専用】各チームのタイム提出状況を表示します")
+    async def time_status(interaction: discord.Interaction):
+
+        # 管理者チェック
+        if not is_admin(interaction):
+            await interaction.response.send_message(
+                "❌ このコマンドは管理者のみ使用できます。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        thread_data = load_json(THREAD_FILE)
+        submit_data = load_json(SUBMIT_FILE)
+
+        if not thread_data.get("active"):
+            await interaction.followup.send("❌ 現在アクティブな試合がありません。", ephemeral=True)
+            return
+
+        embed = discord.Embed(
+            title="📊 チーム別 タイム提出状況",
+            color=0x2ecc71
+        )
+
+        courses = thread_data.get("courses", [])
+
+        for team_name, team_info in thread_data.get("teams", {}).items():
+            thread_id = team_info["thread_id"]
+            team_submit = submit_data.get(thread_id, {})
+
+            text = ""
+
+            for c in courses:
+                course_name = c["name"]
+
+                if course_name in team_submit and team_submit[course_name]:
+                    for entry in team_submit[course_name]:
+                        text += f"🗺️ {course_name}\n"
+                        text += f"　👤 {entry['name']}\n"
+                        text += f"　⏱️ {entry['time']}\n"
+                else:
+                    text += f"🗺️ {course_name}\n　❌ 未提出\n"
+
+                text += "\n"
+
+            embed.add_field(
+                name=f"🏎️ {team_name}",
+                value=text if text else "データなし",
+                inline=False
+            )
+
+        await interaction.followup.send(embed=embed, ephemeral=True)
