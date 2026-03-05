@@ -467,9 +467,15 @@ def setup(tree: app_commands.CommandTree):
         thread_data = load_json(THREAD_FILE)
 
         teams = thread_data.get("teams", {})
-        await interaction.response.send_message(
-            f"{teams}"
-        )
+        #以下デバッグ用
+        channel_id = str(interaction.channel.id)
+
+        debug_text = f"channel_id = {channel_id}\n"
+
+        for name, info in teams.items():
+            debug_text += f"{name}: thread_id = {info['thread_id']}\n"
+
+        await interaction.response.send_message(debug_text)
         return
 
         # ③ このスレッドがチームスレッドか判定
