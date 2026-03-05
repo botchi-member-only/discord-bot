@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "name": "ROME - SAINT PETERS KICKOFF"
+    "name": "ROME - SAINT PETER’S KICKOFF"
   },
   {
     "id": 2,
@@ -46,5 +46,29 @@
   {
     "id":12,
     "name": "SAN FRANCISCO - TUNNEL JAM"
+  },
+  {
+    "id": 13,#####################################
+    "name": "CAIRO - THOUSAND MINARETS"
+  },
+  {
+    "id": 14,
+    "name": "CAIRO - NILE RIVER"
+  },
+  {
+    "id": 15,
+    "name": "CAIRO - ANCIENT WONDERS"
+  },
+  {
+    "id":16,
+    "name": "CAIRO - BACKBURNER"
+  },
+  {
+    "id":17,
+    "name": "CAIRO - EGYPTIAN WONDER"
+  },
+  {
+    "id":18,
+    "name": "U.S.MIDWEST - IT’S A TWISTER！"
   }
 ]
