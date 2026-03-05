@@ -152,4 +152,9 @@ def setup(tree: app_commands.CommandTree):
         )
 
     # 動的 choices 登録
-    submit_time.autocomplete("course")(lambda i, c: get_course_choices())
+    @submit_time.autocomplete("course")
+    async def course_autocomplete(
+        interaction: discord.Interaction,
+        current: str
+    ):
+        return get_course_choices()
