@@ -73,6 +73,22 @@ def trigger_submit_update(data):
     }
     requests.post(url, headers=headers, json=payload)
 
+def time_to_ms(time_str: str) -> int:
+    """
+    1:23.456 → 83456 (ミリ秒)
+    """
+    try:
+        minute, rest = time_str.split(":")
+        second, ms = rest.split(".")
+        total_ms = (
+            int(minute) * 60 * 1000 +
+            int(second) * 1000 +
+            int(ms)
+        )
+        return total_ms
+    except:
+        return 999999999  # 不正値は最下位扱い
+
 async def course_autocomplete(
     interaction: discord.Interaction,
     current: str
@@ -786,3 +802,79 @@ def setup(tree: app_commands.CommandTree):
             f"⏱️ 新タイム: {time}",
             ephemeral=False
         )
+    @tree.command(name="result", description="各コースごとに結果を集計します")
+    async def result(interaction: discord.Interaction):
+
+        await interaction.response.defer()
+
+        submit_data = load_json(SUBMIT_FILE)
+        thread_data = load_json(THREAD_FILE)
+
+        if not submit_data:
+            await interaction.followup.send("❌ タイム提出データがありません。")
+            return
+
+        POINT_TABLE = [10, 8, 6, 4, 2]
+
+        team_scores = {}
+        course_results = {}
+
+        # スレッドID → チーム名対応表
+        thread_to_team = {}
+        for team_name, info in thread_data["teams"].items():
+            thread_to_team[info["thread_id"]] = team_name
+            team_scores[team_name] = 0
+
+        # 各スレッド（チーム）
+        for thread_id, courses in submit_data.items():
+            team_name = thread_to_team.get(thread_id)
+            if not team_name:
+                continue
+
+            for course_name, records in courses.items():
+
+                if course_name not in course_results:
+                    course_results[course_name] = []
+
+                # チーム内最速タイムを取得
+                best = min(
+                    records,
+                    key=lambda x: time_to_ms(x["time"])
+                )
+
+                course_results[course_name].append({
+                    "team": team_name,
+                    "time": best["time"],
+                    "ms": time_to_ms(best["time"])
+                })
+
+        # コースごとに順位付け
+        result_text = ""
+
+        for course, team_list in course_results.items():
+            team_list.sort(key=lambda x: x["ms"])
+
+            result_text += f"🛣️ **{course}**\n"
+
+            for i, data in enumerate(team_list):
+                point = POINT_TABLE[i] if i < len(POINT_TABLE) else 0
+                team_scores[data["team"]] += point
+
+                result_text += f"{i+1}位 {data['team']} : {data['time']} (+{point}点)\n"
+
+            result_text += "\n"
+
+        # 総合結果
+        result_text += "🏆 **総合得点**\n"
+        sorted_scores = sorted(team_scores.items(), key=lambda x: x[1], reverse=True)
+
+        for rank, (team, score) in enumerate(sorted_scores, 1):
+            result_text += f"{rank}位 {team} : {score}点\n"
+
+        embed = discord.Embed(
+            title="📊 レース結果",
+            description=result_text,
+            color=0x00ff00
+        )
+
+        await interaction.followup.send(embed=embed)
