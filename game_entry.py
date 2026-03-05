@@ -10,7 +10,7 @@ MEMBER_FILE = "Members.json"
 GAME_FILE = "GameParticipants.json"
 COURSE_FILE = "Courses.json"
 MACHINE_FILE = "MachineConditions.json"
-THREAD_FILE = "GameThreads.json"
+GAMESTATE_FILE = "GameState.json"
 
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -163,6 +163,10 @@ def setup(tree: app_commands.CommandTree):
     @tree.command(name="gamestart", description="チームを生成してメンバーを振り分けます")
     @app_commands.describe(team_count="作成するチーム数")
     async def GameStart(interaction: discord.Interaction, team_count: int):
+        
+        if not is_admin(interaction):
+            await interaction.response.send_message("❌ 管理者専用コマンドです。", ephemeral=True)
+            return
 
         await interaction.response.defer()
 
@@ -313,28 +317,26 @@ def setup(tree: app_commands.CommandTree):
 
         from datetime import datetime
 
-        thread_save_data = {
+        game_state = {
             "active": True,
             "created_at": datetime.now().isoformat(),
             "courses": [],
             "teams": {}
         }
+
         # ==========================
         # コース情報保存
         # ==========================
-
         for pair in course_machine_pairs:
-
-            thread_save_data["courses"].append({
+            game_state["courses"].append({
                 "id": pair["course"]["id"],
                 "name": pair["course"]["name"],
                 "machine_label": pair["machine"]["label"]
             })
 
         # ==========================
-        # チーム戦略スレッド作成
+        # チーム戦略スレッド作成 & 保存
         # ==========================
-
         for team in teams:
 
             thread = await interaction.channel.create_thread(
@@ -343,7 +345,6 @@ def setup(tree: app_commands.CommandTree):
                 invitable=False
             )
 
-            # ★ 表示安定用
             await thread.send("🟢 スレッドを作成しました。")
 
             # メンバー招待
@@ -355,31 +356,24 @@ def setup(tree: app_commands.CommandTree):
                     except:
                         pass
 
-            # メンション文字列作成
-            mentions = " ".join(
-                f"<@{m['user_id']}>" for m in team["members"]
-            )
+            # GameState に保存
+            game_state["teams"][team["name"]] = {
+                "thread_id": str(thread.id),
+                "members": team["members"]
+            }
 
-            # 戦略開始メッセージ
+            mentions = " ".join(f"<@{m['user_id']}>" for m in team["members"])
+
             await thread.send(
                 f"{mentions}\n\n"
                 f"🏎️ **{team['name']} 戦略会議を開始します！**\n"
                 "🛣️ 担当コースをここで決定してください。\n"
-                "⏱️ タイム提出前に必ず確認を！\n\n"
-                "## このチャンネルの使い方\n"
-                "だれがどのコースを走るか決めよう！\n"
-                "-# 名前の横にコース数も書いてあるのでチェック\n"
-                "走行タイムを``/submittime``コマンドで送ろう！\n"
-                "タイムを修正するときは``/submittime``タイムを削除するときは``/withdrawtime``だ\n"
-                "-# 走るコースを変えるときは必ず``/withdrawtime``してくれ\n"
-                "``/myteamstatus``で自分のチームの状況を確認できるぞ"
+                "走行タイムは `/submittime` で送信してください。\n"
+                "`/myteamstatus` でチーム状況を確認できます。"
             )
-            # ★ スレッドID保存
-            thread_save_data["teams"][team["name"]] = {
-                "thread_id": str(thread.id)
-            }
+
         # ==========================
         # JSON保存 & GitHub反映
         # ==========================
-        save_json(THREAD_FILE, thread_save_data)
-        trigger_thread_update(thread_save_data)
+        save_json(GAMESTATE_FILE, game_state)
+        trigger_game_update(game_state))
