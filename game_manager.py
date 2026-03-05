@@ -500,8 +500,10 @@ def setup(tree: app_commands.CommandTree):
 
         if result_channel:
             await result_channel.send(
+                uid = entry["user_id"]
                 f"🏁 **タイム提出**\n"
-                f"👤 {user_name}\n"
+                #f"👤 {user_name}\n"
+                f"text += f"　👤 <@{uid}>\n"
                 f"🗺️ {course}\n"
                 f"⏱️ {time}"
             )
