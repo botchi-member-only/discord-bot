@@ -119,6 +119,18 @@ def setup(tree: app_commands.CommandTree):
         if "records" not in records:
             records["records"] = []
 
+        for r in records["records"]:
+            if (
+                r["team"] == team_name and
+                r["course_id"] == selected_course["id"] and
+                r["user_id"] != user_id
+            ):
+                await interaction.followup.send(
+                    "❌ 同じチームの他メンバーが既にこのコースを提出しています。",
+                    ephemeral=True
+                )
+                return
+
         record = {
             "team": team_name,
             "user_id": user_id,
