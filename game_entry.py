@@ -11,6 +11,7 @@ GAME_FILE = "GameParticipants.json"
 COURSE_FILE = "Courses.json"
 MACHINE_FILE = "MachineConditions.json"
 GAMESTATE_FILE = "GameState.json"
+TIMERECORD_FILE = "TimeRecords.json"
 
 REPO = "botchi-member-only/discord-bot"
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
@@ -51,6 +52,20 @@ def trigger_game_state_update(data):
     }
     payload = {
         "event_type": "GameUpdateState",
+        "client_payload": {
+            "data": json.dumps(data, ensure_ascii=False)
+        }
+    }
+    requests.post(url, headers=headers, json=payload)
+
+def trigger_time_record_update(data):
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+    payload = {
+        "event_type": "TimeRecordUpdate",
         "client_payload": {
             "data": json.dumps(data, ensure_ascii=False)
         }
@@ -377,3 +392,12 @@ def setup(tree: app_commands.CommandTree):
         # ==========================
         save_json(GAMESTATE_FILE, game_state)
         trigger_game_state_update(game_state)
+
+        # ==========================
+        # TimeRecords.json 初期化
+        # ==========================
+        empty_records = {
+            "records": []
+        }
+        save_json(TIMERECORD_FILE, empty_records)
+        trigger_time_record_update(empty_records)
