@@ -20,6 +20,11 @@ jobs:
           git config user.name "GameBot"
           git config user.email "gamebot@example.com"
 
+      # ★ 追加
+      - name: Pull latest changes
+        run: |
+          git pull origin main --rebase
+
       - name: Update TimeRecords.json
         run: |
           echo '${{ github.event.client_payload.data }}' > TimeRecords.json
@@ -27,5 +32,5 @@ jobs:
       - name: Commit and push
         run: |
           git add TimeRecords.json
-          git commit -m "Update TimeRecords.json (auto-save)"
-          git push
+          git commit -m "Update TimeRecords.json (auto-save)" || echo "No changes to commit"
+          git push origin main
