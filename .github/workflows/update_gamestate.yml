@@ -2,7 +2,7 @@ name: Update GameState.json
 
 on:
   repository_dispatch:
-    types: [GameUpdate]
+    types: [GameUpdateState]
 
 permissions:
   contents: write
