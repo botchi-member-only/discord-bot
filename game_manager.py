@@ -82,7 +82,7 @@ def setup(tree: app_commands.CommandTree):
         course: str,
         time: str
     ):
-        game_state = load_json(GAME_STATE_FILE)
+        game_state = load_json(GAMESTATE_FILE)
 
         if game_state.get("result_locked"):
             await interaction.response.send_message(
@@ -197,7 +197,7 @@ def setup(tree: app_commands.CommandTree):
     @app_commands.describe(course="コース")
     async def withdraw_time(interaction: discord.Interaction, course: str):
         
-        game_state = load_json(GAME_STATE_FILE)
+        game_state = load_json(GAMESTATE_FILE)
 
         if game_state.get("result_locked"):
             await interaction.response.send_message(
