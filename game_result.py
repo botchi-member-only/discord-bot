@@ -60,7 +60,7 @@ def setup(tree: app_commands.CommandTree):
         team_scores = {team: 0 for team in teams}
 
         embed = discord.Embed(
-            title="🏁 Botchi Club Event Result",
+            title="🏁 Botchi Team Clash Result",
             color=0xffd700
         )
 
