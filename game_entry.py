@@ -137,14 +137,55 @@ def trigger_game_data_reset():
 # ==========================
 
 def setup(tree: app_commands.CommandTree):
+    @tree.command(name="gameopen", description="イベントの参加受付を開始します")
+    async def gameopen(interaction: discord.Interaction):
 
+        # 管理者チェック
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ 管理者のみ実行できます。",
+                ephemeral=True
+            )
+            return
+
+        game_state = load_json(GAMESTATE_FILE)
+
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "idle":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                ephemeral=True
+            )
+            return
+
+        # state変更
+        game_state["state"] = "entry_open"
+
+        save_json(GAMESTATE_FILE, game_state)
+        trigger_game_state_update(game_state)
+
+        await interaction.response.send_message(
+            "🟢 イベント参加受付を開始しました！\n`/joinGame` で参加できます。"
+        )
+        
     @tree.command(name="joingame", description="Botchi Team Clashに参加します")
     async def join_game(interaction: discord.Interaction):
 
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "entry_open":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                ephemeral=True
+            )
+            return
         user_id = str(interaction.user.id)
-
+        
         members = load_json(MEMBER_FILE)
-
+        
         if user_id not in members:
             await interaction.response.send_message(
                 "❌ あなたはメンバー登録されていません。",
@@ -176,7 +217,15 @@ def setup(tree: app_commands.CommandTree):
 
     @tree.command(name="leavegame", description="ゲーム参加を取り消します")
     async def leave_game(interaction: discord.Interaction):
+        current_state = game_state.get("state", "idle")
 
+        # idle状態でないと開始できない
+        if current_state != "entry_open":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                ephemeral=True
+            )
+            return
         user_id = str(interaction.user.id)
         participants = load_json(GAME_FILE)
 
@@ -239,7 +288,15 @@ def setup(tree: app_commands.CommandTree):
             return
 
         await interaction.response.defer()
+        current_state = game_state.get("state", "idle")
 
+        # idle状態でないと開始できない
+        if current_state != "entry_open":
+            await interaction.followup.send(
+                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                ephemeral=True
+            )
+            return
         # 参加者読み込み
         try:
             with open("GameParticipants.json", "r", encoding="utf-8") as f:
@@ -389,7 +446,7 @@ def setup(tree: app_commands.CommandTree):
 
         game_state = {
             "active": True,
-            "result_locked": False,
+            "state": False,
             "created_at": datetime.now().isoformat(),
             "courses": [],
             "teams": {}
@@ -454,7 +511,7 @@ def setup(tree: app_commands.CommandTree):
 
     @tree.command(name="reset", description="タイム、チーム編成、参加者一覧 を初期化します")
     async def reset_command(interaction: discord.Interaction):
-
+        
         # 管理者チェック
         if not is_admin(interaction):
             await interaction.response.send_message(
@@ -462,7 +519,15 @@ def setup(tree: app_commands.CommandTree):
                 ephemeral=True
             )
             return
+        current_state = game_state.get("state", "idle")
 
+        # idle状態でないと開始できない
+        if current_state != "finished":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                ephemeral=True
+            )
+            return
         view = ResetConfirmView()
 
         await interaction.response.send_message(
