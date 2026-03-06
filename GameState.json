@@ -1,1 +1,1 @@
-{"state": "entry_open"}
+{"active": true, "state": false, "created_at": "2026-03-06T15:13:33.165534", "courses": [{"id": 1, "name": "ROME - SAINT PETER’S KICKOFF", "machine_label": "メーカー指定: Porsche (B class or A class)"}], "teams": {"αチーム": {"thread_id": "1479497171102597181", "members": [{"user_id": "1228003399933497366", "display_name": "tamgamecreator", "rank": "B+", "courses": 1}]}}}
