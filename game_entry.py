@@ -389,6 +389,7 @@ def setup(tree: app_commands.CommandTree):
 
         game_state = {
             "active": True,
+            "result_locked": False,
             "created_at": datetime.now().isoformat(),
             "courses": [],
             "teams": {}
