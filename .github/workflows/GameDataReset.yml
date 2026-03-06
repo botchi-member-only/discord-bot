@@ -7,6 +7,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: json-save
+  cancel-in-progress: false
+
 jobs:
   reset:
     runs-on: ubuntu-latest
@@ -14,11 +18,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Git
         run: |
           git config user.name "GameBot"
           git config user.email "gamebot@example.com"
+
+      - name: Pull latest changes
+        run: git pull origin main --rebase
 
       - name: Reset JSON files
         run: |
@@ -26,9 +35,10 @@ jobs:
           echo '{"records":[]}' > TimeRecords.json
           echo '{}' > GameParticipants.json
 
-      - name: Commit and push
+      - name: Commit
         run: |
           git add GameState.json TimeRecords.json GameParticipants.json
-          git commit -m "Reset game data (auto)"
-          git pull --rebase
-          git push
+          git commit -m "Reset game data (auto)" || echo "No changes"
+
+      - name: Push
+        run: git push origin main
