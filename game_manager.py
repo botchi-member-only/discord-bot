@@ -335,6 +335,7 @@ def setup(tree: app_commands.CommandTree):
         for team_name, team_data in teams.items():
 
             text = ""
+            submitted = 0
 
             for course in courses:
 
@@ -350,6 +351,7 @@ def setup(tree: app_commands.CommandTree):
                         f"**{course['name']}**\n"
                         f"<@{record['user_id']}> `{record['time']}`\n\n"
                     )
+                    submitted += 1
                 else:
                     text += (
                         f"**{course['name']}**\n"
@@ -362,7 +364,6 @@ def setup(tree: app_commands.CommandTree):
                 inline=False
             )
             total = len(courses) * len(teams)
-            submitted = len(records)
 
             embed.set_footer(text=f"提出数: {submitted}/{total}")
 
