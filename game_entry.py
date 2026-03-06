@@ -155,7 +155,7 @@ def setup(tree: app_commands.CommandTree):
         # idle状態でないと開始できない
         if current_state != "idle":
             await interaction.response.send_message(
-                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                f"❌ 現在の状態は `{current_state}` で既に開始されています。",
                 ephemeral=True
             )
             return
@@ -178,7 +178,7 @@ def setup(tree: app_commands.CommandTree):
         # idle状態でないと開始できない
         if current_state != "entry_open":
             await interaction.response.send_message(
-                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                f"❌ 現在の状態は `{current_state}` のため実行できません。",
                 ephemeral=True
             )
             return
@@ -222,7 +222,7 @@ def setup(tree: app_commands.CommandTree):
         # idle状態でないと開始できない
         if current_state != "entry_open":
             await interaction.response.send_message(
-                f"❌ 現在の状態は `{current_state}` のため開始できません。",
+                f"❌ 現在の状態は `{current_state}` のため実行できません。",
                 ephemeral=True
             )
             return
@@ -517,16 +517,6 @@ def setup(tree: app_commands.CommandTree):
         if not is_admin(interaction):
             await interaction.response.send_message(
                 "❌ このコマンドは管理者専用です。",
-                ephemeral=True
-            )
-            return
-        game_state = load_json(GAMESTATE_FILE)
-        current_state = game_state.get("state", "idle")
-
-        # idle状態でないと開始できない
-        if current_state != "finished":
-            await interaction.response.send_message(
-                f"❌ 現在の状態は `{current_state}` のため開始できません。",
                 ephemeral=True
             )
             return
