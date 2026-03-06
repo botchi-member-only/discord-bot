@@ -302,6 +302,72 @@ def setup(tree: app_commands.CommandTree):
 
         await interaction.response.send_message(embed=embed)
 
+    @tree.command(name="timestatus", description="【管理者専用】全チームの提出状況を表示")
+        async def time_status(interaction: discord.Interaction):
+
+        # 管理者チェック
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ このコマンドは管理者のみ使用できます。",
+                ephemeral=True
+            )
+            return
+
+        state = load_json(GAMESTATE_FILE)
+        records_data = load_json(TIMERECORD_FILE)
+
+        if not state.get("active"):
+            await interaction.response.send_message(
+                "❌ ゲームは開始されていません。",
+                ephemeral=True
+            )
+            return
+
+        records = records_data.get("records", [])
+        courses = state.get("courses", [])
+        teams = state.get("teams", {})
+
+        embed = discord.Embed(
+            title="🏁 全チーム提出状況",
+            color=0x3498db
+        )
+
+        for team_name, team_data in teams.items():
+
+            text = ""
+
+            for course in courses:
+
+                record = None
+
+                for r in records:
+                    if r["team"] == team_name and r["course_id"] == course["id"]:
+                        record = r
+                        break
+
+                if record:
+                    text += (
+                        f"**{course['name']}**\n"
+                        f"<@{record['user_id']}> `{record['time']}`\n\n"
+                    )
+                else:
+                    text += (
+                        f"**{course['name']}**\n"
+                        f"未提出\n\n"
+                    )
+
+            embed.add_field(
+                name=f"🏎️ {team_name}",
+                value=text,
+                inline=False
+            )
+            total = len(courses) * len(teams)
+            submitted = len(records)
+
+            embed.set_footer(text=f"提出数: {submitted}/{total}")
+
+        await interaction.response.send_message(embed=embed)
+
     # 動的 choices 登録
     @submit_time.autocomplete("course")
     @withdraw_time.autocomplete("course")
