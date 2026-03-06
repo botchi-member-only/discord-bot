@@ -26,6 +26,8 @@ from game_entry import setup as setup_game
 setup_game(tree)
 from game_manager import setup as setup_game
 setup_game(tree)
+from game_result import setup as setup_game
+setup_game(tree)
 
 # 日本時間（JST）
 JST = timezone(timedelta(hours=9))
