@@ -20,6 +20,20 @@ def time_to_seconds(t):
     m, s = t.split(":")
     return int(m) * 60 + float(s)
 
+RANK_MULTIPLIER = {
+    "A": 1.0,
+    "A-": 1.05,
+    "B+": 1.1,
+    "B": 1.15
+}
+
+SCORE_TABLE = [10, 8, 6, 4, 2]
+
+def get_member_rank(team_data, user_id):
+    for m in team_data["members"]:
+        if m["user_id"] == user_id:
+            return m.get("rank", "A")
+    return "A"
 
 # ==========================
 # コマンド登録
@@ -30,7 +44,6 @@ def setup(tree: app_commands.CommandTree):
     @tree.command(name="result", description="イベント結果を表示します")
     async def result(interaction: discord.Interaction):
 
-        # 管理者チェック
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message("❌ 管理者のみ実行できます。", ephemeral=True)
             return
@@ -44,67 +57,79 @@ def setup(tree: app_commands.CommandTree):
         courses = game_state.get("courses", [])
         teams = game_state.get("teams", {})
 
-        score_table = [10, 8, 6, 4, 2]
         team_scores = {team: 0 for team in teams}
 
         embed = discord.Embed(
-            title="🏁 イベント結果",
+            title="🏁 Botchi Club Event Result",
             color=0xffd700
         )
+
+        embed.description = f"参加チーム: {len(teams)}\nコース数: {len(courses)}"
 
         for course in courses:
 
             course_id = course["id"]
             course_name = course["name"]
 
-            course_results = []
+            results = []
 
-            # 各チームのタイム取得
             for team_name, team_data in teams.items():
 
-                team_records = [
-                    r for r in records
-                    if r["course_id"] == course_id and r["team"] == team_name
-                ]
+                rec = next(
+                    (r for r in records if r["course_id"] == course_id and r["team"] == team_name),
+                    None
+                )
 
-                if team_records:
-                    r = team_records[0]
-                    time_str = r["time"]
-                    sec = time_to_seconds(time_str)
-                    user_id = r["user_id"]
+                if rec:
+                    sec = time_to_seconds(rec["time"])
+                    user_id = rec["user_id"]
+                    time_str = rec["time"]
                 else:
-                    time_str = "未提出"
                     sec = float("inf")
                     user_id = None
+                    time_str = "---"
 
-                course_results.append({
+                results.append({
                     "team": team_name,
-                    "user_id": user_id,
+                    "user": user_id,
                     "time": time_str,
                     "sec": sec
                 })
 
-            # タイム順ソート
-            course_results.sort(key=lambda x: x["sec"])
+            results.sort(key=lambda x: x["sec"])
 
             text = ""
 
-            for i, r in enumerate(course_results):
+            for i, r in enumerate(results):
 
-                if r["time"] == "未提出":
-                    point = 0
+                if r["user"] is None:
+                    base_score = 0
+                    multiplier = 1
                 else:
-                    point = score_table[i] if i < len(score_table) else 0
+                    base_score = SCORE_TABLE[i] if i < len(SCORE_TABLE) else 0
 
-                team_scores[r["team"]] += point
+                    rank = get_member_rank(teams[r["team"]], r["user"])
+                    multiplier = RANK_MULTIPLIER.get(rank, 1)
 
-                runner = f"<@{r['user_id']}>" if r["user_id"] else "未提出"
+                final_score = base_score * multiplier
+                team_scores[r["team"]] += final_score
+
+                if i == 0:
+                    medal = "🥇"
+                elif i == 1:
+                    medal = "🥈"
+                elif i == 2:
+                    medal = "🥉"
+                else:
+                    medal = f"{i+1}位"
+
+                runner = f"<@{r['user']}>" if r["user"] else "未提出"
 
                 text += (
-                    f"{i+1}位 | {r['team']}\n"
-                    f"走者: {runner}\n"
-                    f"タイム: {r['time']}\n"
-                    f"獲得ポイント: {point}\n\n"
+                    f"{medal} {r['team']}\n"
+                    f"👤 {runner}\n"
+                    f"⏱ {r['time']}\n"
+                    f"🏆 +{final_score:.2f}pt\n\n"
                 )
 
             embed.add_field(
@@ -113,21 +138,27 @@ def setup(tree: app_commands.CommandTree):
                 inline=False
             )
 
-        # 合計スコア
-        score_text = ""
+        # 総合順位
+        sorted_scores = sorted(team_scores.items(), key=lambda x: x[1], reverse=True)
 
-        sorted_scores = sorted(
-            team_scores.items(),
-            key=lambda x: x[1],
-            reverse=True
-        )
+        total_text = "━━━━━━━━━━━━━━\n🏆 総合順位\n━━━━━━━━━━━━━━\n\n"
 
-        for rank, (team, score) in enumerate(sorted_scores, start=1):
-            score_text += f"{rank}位 | {team} : {score}点\n"
+        for i, (team, score) in enumerate(sorted_scores):
+
+            if i == 0:
+                medal = "🥇"
+            elif i == 1:
+                medal = "🥈"
+            elif i == 2:
+                medal = "🥉"
+            else:
+                medal = f"{i+1}位"
+
+            total_text += f"{medal} {team}　{score:.2f}pt\n"
 
         embed.add_field(
-            name="🏆 チーム合計スコア",
-            value=score_text,
+            name="総合結果",
+            value=total_text,
             inline=False
         )
 
