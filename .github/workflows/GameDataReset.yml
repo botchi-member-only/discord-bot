@@ -1,0 +1,34 @@
+name: Reset Game Data
+
+on:
+  repository_dispatch:
+    types: [GameDataReset]
+
+permissions:
+  contents: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config user.name "GameBot"
+          git config user.email "gamebot@example.com"
+
+      - name: Reset JSON files
+        run: |
+          echo '{}' > GameState.json
+          echo '{"records":[]}' > TimeRecords.json
+          echo '{}' > GameParticipants.json
+
+      - name: Commit and push
+        run: |
+          git add GameState.json TimeRecords.json GameParticipants.json
+          git commit -m "Reset game data (auto)"
+          git pull --rebase
+          git push
