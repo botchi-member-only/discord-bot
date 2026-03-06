@@ -82,6 +82,15 @@ def setup(tree: app_commands.CommandTree):
         course: str,
         time: str
     ):
+        game_state = load_json(GAME_STATE_FILE)
+
+        if game_state.get("result_locked"):
+            await interaction.response.send_message(
+                "❌ 結果発表後はタイムを変更できません。",
+                ephemeral=True
+            )
+            return
+        
         # 実行者のみ表示
         await interaction.response.defer(ephemeral=True)
 
@@ -187,6 +196,15 @@ def setup(tree: app_commands.CommandTree):
     @tree.command(name="withdrawtime", description="提出したタイムを撤回します")
     @app_commands.describe(course="コース")
     async def withdraw_time(interaction: discord.Interaction, course: str):
+        
+        game_state = load_json(GAME_STATE_FILE)
+
+        if game_state.get("result_locked"):
+            await interaction.response.send_message(
+                "❌ 結果発表後はタイムを変更できません。",
+                ephemeral=True
+            )
+            return
 
         user_id = str(interaction.user.id)
         course_id = int(course)
