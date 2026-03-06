@@ -89,6 +89,10 @@ class ResetConfirmView(discord.ui.View):
 
     @discord.ui.button(label="✅ 実行する", style=discord.ButtonStyle.danger)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        
+        save_json("GameState.json", {})
+        save_json("GameParticipants.json", {})
+        save_json("TimeRecords.json", {"records": []})
 
         # GitHub Actions にリセット依頼
         trigger_game_data_reset()
@@ -458,7 +462,7 @@ def setup(tree: app_commands.CommandTree):
         view = ResetConfirmView()
 
         await interaction.response.send_message(
-            "⚠️ **TimeRecords.json を初期化します。よろしいですか？**\n"
+            "⚠️ **タイム、チーム編成、参加者一覧 を初期化します。よろしいですか？**\n"
             "この操作は取り消せません。",
             view=view,
             ephemeral=True
