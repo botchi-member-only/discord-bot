@@ -46,16 +46,25 @@ def trigger_time_record_update(data):
 # コース choice 動的生成
 # ==========================
 
-def get_course_choices():
+async def get_course_choices(interaction: discord.Interaction, current: str):
+
     state = load_json(GAMESTATE_FILE)
     courses = state.get("courses", [])
-    return [
-        app_commands.Choice(
-            name=f"{c['name']} | {c['machine_label']}",
-            value=str(c["id"])
-        )
-        for c in courses
-    ]
+
+    choices = []
+
+    for c in courses:
+        name = f"{c['name']} | {c['machine_label']}"
+
+        if current.lower() in name.lower():
+            choices.append(
+                app_commands.Choice(
+                    name=name,
+                    value=str(c["id"])
+                )
+            )
+
+    return choices[:25]
 
 # ==========================
 # setup
@@ -225,6 +234,7 @@ def setup(tree: app_commands.CommandTree):
 
     # 動的 choices 登録
     @submit_time.autocomplete("course")
+    @withdraw_time.autocomplete("course")
     async def course_autocomplete(
         interaction: discord.Interaction,
         current: str
