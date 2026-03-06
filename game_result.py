@@ -161,5 +161,9 @@ def setup(tree: app_commands.CommandTree):
             value=total_text,
             inline=False
         )
+        game_state["result_locked"] = True
 
+        with open(GAME_STATE_FILE, "w", encoding="utf-8") as f:
+            json.dump(game_state, f, ensure_ascii=False, indent=2)
+            
         await interaction.followup.send(embed=embed)
