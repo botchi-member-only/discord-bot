@@ -138,7 +138,7 @@ def trigger_game_data_reset():
 
 def setup(tree: app_commands.CommandTree):
 
-    @tree.command(name="joingame", description="ゲームに参加します")
+    @tree.command(name="joingame", description="Botchi Team Clashに参加します")
     async def join_game(interaction: discord.Interaction):
 
         user_id = str(interaction.user.id)
@@ -170,7 +170,7 @@ def setup(tree: app_commands.CommandTree):
         trigger_game_update(participants)
 
         await interaction.response.send_message(
-            f"✅ 参加しました！（レベル: {members[user_id]['level']}）"
+            f"✅ **Botchi Team Clash**に参加しました！（レベル: {members[user_id]['level']}）"
         )
 
 
@@ -437,6 +437,7 @@ def setup(tree: app_commands.CommandTree):
 
             await thread.send(
                 f"{mentions}\n\n"
+                "## Botchi Team Clash\n\n"
                 f"🏎️ **{team['name']} 戦略会議を開始します！**\n"
                 "🛣️ 担当コースをここで決定してください。\n"
                 "走行タイムは `/submittime` で送信してください。\n"
