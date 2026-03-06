@@ -175,6 +175,54 @@ def setup(tree: app_commands.CommandTree):
             ephemeral=True
         )
 
+    @tree.command(name="withdrawtime", description="提出したタイムを撤回します")
+    @app_commands.describe(course="コース")
+    async def withdraw_time(interaction: discord.Interaction, course: str):
+
+        user_id = str(interaction.user.id)
+        course_id = int(course)
+
+        data = load_json(TIMERECORD_FILE)
+        records = data.get("records", [])
+
+        new_records = []
+        removed = None
+
+        for r in records:
+            if r["user_id"] == user_id and r["course_id"] == course_id:
+                removed = r
+                continue
+            new_records.append(r)
+
+        if removed is None:
+            await interaction.response.send_message(
+                "❌ このコースの提出タイムは見つかりません。",
+                ephemeral=True
+            )
+            return
+
+        data["records"] = new_records
+
+        save_json(TIMERECORD_FILE, data)
+        trigger_time_record_update(data)
+
+        # 通知チャンネル
+        channel = interaction.client.get_channel(RESULT_CHANNEL_ID)
+
+        if channel:
+            await channel.send(
+                f"🗑️ **タイム撤回**\n"
+                f"チーム: {removed['team']}\n"
+                f"プレイヤー: {interaction.user.mention}\n"
+                f"コース: {removed['course_name']}"
+            )
+
+        await interaction.response.send_message(
+            f"🗑️ **タイムを撤回しました**\n"
+            f"{removed['course_name']}",
+            ephemeral=True
+        )
+
     # 動的 choices 登録
     @submit_time.autocomplete("course")
     async def course_autocomplete(
