@@ -182,13 +182,13 @@ def setup(tree: app_commands.CommandTree):
             await channel.send(
                 f"⏱️ **タイム提出**\n"
                 f"チーム: {team_name}\n"
-                f"ユーザー: {interaction.user.display_name}\n"
+                f"ユーザー: {interaction.user.mention}\n"
                 f"コース: {selected_course['name']}\n"
                 f"タイム: `{time}`"
             )
 
         await interaction.followup.send(
-            f"✅ タイムを記録しました。\n"
+            f"✅ タイムを記録しました。**運営に走行動画を送信してください**\n"
             f"{selected_course['name']} : `{time}`",
             ephemeral=True
         )
