@@ -440,6 +440,8 @@ def setup(tree: app_commands.CommandTree):
                 f"🏎️ **{team['name']} 戦略会議を開始します！**\n"
                 "🛣️ 担当コースをここで決定してください。\n"
                 "走行タイムは `/submittime` で送信してください。\n"
+                 "走行コースを変更する際は必ず `/withdrawtime` で撤回してください。\n"
+                 "走行動画を運営に送ってください。\n"
                 "`/myteamstatus` でチーム状況を確認できます。"
             )
 
