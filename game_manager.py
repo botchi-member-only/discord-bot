@@ -303,7 +303,7 @@ def setup(tree: app_commands.CommandTree):
         await interaction.response.send_message(embed=embed)
 
     @tree.command(name="timestatus", description="【管理者専用】全チームの提出状況を表示")
-        async def time_status(interaction: discord.Interaction):
+    async def time_status(interaction: discord.Interaction):
 
         # 管理者チェック
         if not interaction.user.guild_permissions.administrator:
