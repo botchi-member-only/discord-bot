@@ -173,8 +173,8 @@ def setup(tree: app_commands.CommandTree):
     @tree.command(name="joingame", description="Botchi Team Clashに参加します")
     async def join_game(interaction: discord.Interaction):
 
+        game_state = load_json(GAMESTATE_FILE)
         current_state = game_state.get("state", "idle")
-
         # idle状態でないと開始できない
         if current_state != "entry_open":
             await interaction.response.send_message(
@@ -217,8 +217,8 @@ def setup(tree: app_commands.CommandTree):
 
     @tree.command(name="leavegame", description="ゲーム参加を取り消します")
     async def leave_game(interaction: discord.Interaction):
+        game_state = load_json(GAMESTATE_FILE)
         current_state = game_state.get("state", "idle")
-
         # idle状態でないと開始できない
         if current_state != "entry_open":
             await interaction.response.send_message(
@@ -288,6 +288,7 @@ def setup(tree: app_commands.CommandTree):
             return
 
         await interaction.response.defer()
+        game_state = load_json(GAMESTATE_FILE)
         current_state = game_state.get("state", "idle")
 
         # idle状態でないと開始できない
@@ -519,6 +520,7 @@ def setup(tree: app_commands.CommandTree):
                 ephemeral=True
             )
             return
+        game_state = load_json(GAMESTATE_FILE)
         current_state = game_state.get("state", "idle")
 
         # idle状態でないと開始できない
