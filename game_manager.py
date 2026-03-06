@@ -232,6 +232,76 @@ def setup(tree: app_commands.CommandTree):
             ephemeral=True
         )
 
+    @tree.command(name="myteamstatus", description="自分のチームの提出状況を表示します")
+    async def my_team_status(interaction: discord.Interaction):
+
+        user_id = str(interaction.user.id)
+
+        state = load_json(GAMESTATE_FILE)
+        records_data = load_json(TIMERECORD_FILE)
+
+        if not state.get("active"):
+            await interaction.response.send_message(
+                "❌ ゲームは開始されていません。",
+                ephemeral=True
+            )
+            return
+
+        records = records_data.get("records", [])
+
+        team_name = None
+        team_members = []
+
+        # 自分のチーム探す
+        for tname, team in state["teams"].items():
+            for m in team["members"]:
+                if m["user_id"] == user_id:
+                    team_name = tname
+                    team_members = team["members"]
+                    break
+
+        if team_name is None:
+            await interaction.response.send_message(
+                "❌ あなたは今回のゲームに参加していません。",
+                ephemeral=True
+            )
+            return
+
+        courses = state.get("courses", [])
+
+        embed = discord.Embed(
+            title=f"🏁 {team_name} 提出状況",
+            color=0x2ecc71
+        )
+
+        text = ""
+
+        for course in courses:
+
+            record = None
+
+            for r in records:
+                if r["team"] == team_name and r["course_id"] == course["id"]:
+                    record = r
+                    break
+
+            if record:
+                text += (
+                    f"**{course['name']}**\n"
+                    f"<@{record['user_id']}> `{record['time']}`\n\n"
+                )
+            else:
+                text += (
+                    f"**{course['name']}**\n"
+                    f"未提出\n\n"
+                )
+
+        embed.description = text
+
+        embed.set_footer(text=f"チーム人数: {len(team_members)}")
+
+        await interaction.response.send_message(embed=embed)
+
     # 動的 choices 登録
     @submit_time.autocomplete("course")
     @withdraw_time.autocomplete("course")
