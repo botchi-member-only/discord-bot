@@ -90,21 +90,19 @@ class ResetConfirmView(discord.ui.View):
     @discord.ui.button(label="✅ 実行する", style=discord.ButtonStyle.danger)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
 
-        empty_records = {"records": []}
+        # GitHub Actions にリセット依頼
+        trigger_game_data_reset()
 
-        save_json(TIMERECORD_FILE, empty_records)
-        trigger_time_record_update(empty_records)
-
-        # ===== 通知チャンネルへ送信 =====
+        # 通知チャンネル
         channel = interaction.client.get_channel(TIME_NOTIFY_CHANNEL_ID)
         if channel:
             await channel.send(
-                f"🗑️ **TimeRecords.json が初期化されました。**\n"
+                f"🗑️ **ゲームデータが初期化されました。**\n"
                 f"実行者：{interaction.user.mention}"
             )
 
         await interaction.response.edit_message(
-            content="🗑️ TimeRecords.json を初期化しました。",
+            content="🗑️ ゲームデータの初期化を実行しました。",
             view=None
         )
 
@@ -114,6 +112,20 @@ class ResetConfirmView(discord.ui.View):
             content="キャンセルしました。",
             view=None
         )
+
+def trigger_game_data_reset():
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+
+    payload = {
+        "event_type": "GameDataReset"
+    }
+
+    requests.post(url, headers=headers, json=payload)
 
 
 # ==========================
