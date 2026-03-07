@@ -461,11 +461,12 @@ def setup(tree: app_commands.CommandTree):
 
         game_state = {
             "active": True,
-            "state": False,
+            "state": "running",
             "created_at": datetime.now().isoformat(),
             "courses": [],
             "teams": {}
         }
+        
 
         # ==========================
         # コース情報保存
