@@ -84,9 +84,12 @@ def setup(tree: app_commands.CommandTree):
     ):
         game_state = load_json(GAMESTATE_FILE)
 
-        if game_state.get("result_locked"):
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "running":
             await interaction.response.send_message(
-                "❌ 結果発表後はタイムを変更できません。",
+                f"❌ 現在の状態は `{current_state}` のため送信できません。",
                 ephemeral=True
             )
             return
@@ -199,9 +202,14 @@ def setup(tree: app_commands.CommandTree):
         
         game_state = load_json(GAMESTATE_FILE)
 
-        if game_state.get("result_locked"):
+        game_state = load_json(GAMESTATE_FILE)
+
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "idle":
             await interaction.response.send_message(
-                "❌ 結果発表後はタイムを変更できません。",
+                f"❌ 現在の状態は `{current_state}` のためタイムの取り消しはできません。",
                 ephemeral=True
             )
             return
