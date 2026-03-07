@@ -128,7 +128,7 @@ def setup(tree: app_commands.CommandTree):
             await interaction.response.send_message("❌ 管理者のみ実行できます。", ephemeral=True)
             return
 
-        game_state = load_json(GAMESTATE_FILE)
+        game_state = load_json(GAME_STATE_FILE)
 
         current_state = game_state.get("state", "idle")
 
