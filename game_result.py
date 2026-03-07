@@ -119,7 +119,7 @@ def setup(tree: app_commands.CommandTree):
         save_json(GAME_STATE_FILE, game_state)
 
         await interaction.response.send_message(
-            "🔒 タイム提出期間を終了しました。"
+            "🔒 タイム提出期間を再開しました。"
         )
     @tree.command(name="result", description="イベント結果を表示します")
     async def result(interaction: discord.Interaction):
@@ -255,5 +255,5 @@ def setup(tree: app_commands.CommandTree):
         )
         game_state["state"] = "finished"
 
-        save_json(GAMESTATE_FILE, game_state)
+        save_json(GAME_STATE_FILE, game_state)
         trigger_game_state_update(game_state)
