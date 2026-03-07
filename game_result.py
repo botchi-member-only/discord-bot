@@ -9,6 +9,9 @@ from datetime import datetime
 TIME_RECORD_FILE = "TimeRecords.json"
 GAME_STATE_FILE = "GameState.json"
 
+REPO = "botchi-member-only/discord-bot"
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+
 def load_json(path):
     if not os.path.exists(path):
         return {}
