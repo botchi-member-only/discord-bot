@@ -207,7 +207,7 @@ def setup(tree: app_commands.CommandTree):
         current_state = game_state.get("state", "idle")
 
         # idle状態でないと開始できない
-        if current_state != "idle":
+        if current_state != "running":
             await interaction.response.send_message(
                 f"❌ 現在の状態は `{current_state}` のためタイムの取り消しはできません。",
                 ephemeral=True
