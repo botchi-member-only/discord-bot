@@ -524,7 +524,7 @@ def setup(tree: app_commands.CommandTree):
         save_json(GAMESTATE_FILE, game_state)
         trigger_game_state_update(game_state)
 
-    @tree.command(name="reset", description="タイム、チーム編成、参加者一覧 を初期化します")
+    @tree.command(name="reset", description="タイム、チーム編成、参加者一覧、作戦会議用スレッド を初期化します")
     async def reset_command(interaction: discord.Interaction):
         
         # 管理者チェック
