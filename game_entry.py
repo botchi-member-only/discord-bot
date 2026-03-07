@@ -89,7 +89,21 @@ class ResetConfirmView(discord.ui.View):
 
     @discord.ui.button(label="✅ 実行する", style=discord.ButtonStyle.danger)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        
+        game_state = load_json("GameState.json")
+
+        # スレッド削除
+        teams = game_state.get("teams", {})
+        for team_name, team_data in teams.items():
+            thread_id = team_data.get("thread_id")
+
+            if thread_id:
+                thread = interaction.client.get_channel(int(thread_id))
+
+                if thread:
+                    try:
+                        await thread.delete()
+                    except Exception as e:
+                        print(f"Thread削除失敗 {thread_id}: {e}")
         save_json("GameState.json", {})
         save_json("GameParticipants.json", {})
         save_json("TimeRecords.json", {"records": []})
@@ -523,7 +537,7 @@ def setup(tree: app_commands.CommandTree):
         view = ResetConfirmView()
 
         await interaction.response.send_message(
-            "⚠️ **タイム、チーム編成、参加者一覧 を初期化します。よろしいですか？**\n"
+            "⚠️ **タイム、チーム編成、参加者一覧、作戦会議用スレッド を初期化します。よろしいですか？**\n"
             "この操作は取り消せません。",
             view=view,
             ephemeral=True
