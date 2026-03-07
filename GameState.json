@@ -1,1 +1,1 @@
-{"state": "entry_open"}
+{"active": true, "state": "running", "created_at": "2026-03-07T12:25:32.833158", "courses": [{"id": 4, "name": "ROME - CAPTAL OF THE WORLD", "machine_label": "メーカー指定: Ferrari (A class or S class)"}], "teams": {"αチーム": {"thread_id": "1479817279259541536", "members": [{"user_id": "1228003399933497366", "display_name": "tamgamecreator", "rank": "B+", "courses": 1}]}}}
