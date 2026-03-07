@@ -15,6 +15,24 @@ def load_json(path):
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+def save_json(path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def trigger_game_state_update(data):
+    url = f"https://api.github.com/repos/{REPO}/dispatches"
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"token {GITHUB_TOKEN}"
+    }
+    payload = {
+        "event_type": "GameUpdateState",
+        "client_payload": {
+            "data": json.dumps(data, ensure_ascii=False)
+        }
+    }
+    requests.post(url, headers=headers, json=payload)
+
 def time_to_seconds(t):
     # "1:23.456" → 秒
     m, s = t.split(":")
@@ -40,12 +58,86 @@ def get_member_rank(team_data, user_id):
 # ==========================
 
 def setup(tree: app_commands.CommandTree):
+    @tree.command(name="closed", description="タイム提出期間を終了します")
+    async def closed(interaction: discord.Interaction):
 
+        # 管理者チェック
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ 管理者のみ実行できます。",
+                ephemeral=True
+            )
+            return
+
+        game_state = load_json(GAME_STATE_FILE)
+
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "running":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` です。running時に使用してください。",
+                ephemeral=True
+            )
+            return
+
+        # state変更
+        game_state["state"] = "time_closed"
+
+        save_json(GAME_STATE_FILE, game_state)
+
+        await interaction.response.send_message(
+            "🔒 タイム提出期間を終了しました。"
+        )
+
+    @tree.command(name="reopen", description="タイム提出期間を再開します")
+    async def closed(interaction: discord.Interaction):
+
+        # 管理者チェック
+        if not interaction.user.guild_permissions.administrator:
+            await interaction.response.send_message(
+                "❌ 管理者のみ実行できます。",
+                ephemeral=True
+            )
+            return
+
+        game_state = load_json(GAME_STATE_FILE)
+
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "time_closed":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` です。time_closed時に使用してください。",
+                ephemeral=True
+            )
+            return
+
+        # state変更
+        game_state["state"] = "running"
+
+        save_json(GAME_STATE_FILE, game_state)
+
+        await interaction.response.send_message(
+            "🔒 タイム提出期間を終了しました。"
+        )
     @tree.command(name="result", description="イベント結果を表示します")
     async def result(interaction: discord.Interaction):
 
         if not interaction.user.guild_permissions.administrator:
             await interaction.response.send_message("❌ 管理者のみ実行できます。", ephemeral=True)
+            return
+
+        game_state = load_json(GAMESTATE_FILE)
+
+        current_state = game_state.get("state", "idle")
+
+        # idle状態でないと開始できない
+        if current_state != "time_closed":
+            await interaction.response.send_message(
+                f"❌ 現在の状態は `{current_state}` です。クローズしてから実行してください。",
+                ephemeral=True
+            )
             return
 
         await interaction.response.defer()
@@ -161,9 +253,7 @@ def setup(tree: app_commands.CommandTree):
             value=total_text,
             inline=False
         )
-        game_state["result_locked"] = True
+        game_state["state"] = "finished"
 
-        with open(GAME_STATE_FILE, "w", encoding="utf-8") as f:
-            json.dump(game_state, f, ensure_ascii=False, indent=2)
-            
-        await interaction.followup.send(embed=embed)
+        save_json(GAMESTATE_FILE, game_state)
+        trigger_game_state_update(game_state)
