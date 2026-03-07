@@ -256,6 +256,7 @@ def setup(tree: app_commands.CommandTree):
             value=total_text,
             inline=False
         )
+        await interaction.followup.send(embed=embed)
         game_state["state"] = "finished"
 
         save_json(GAME_STATE_FILE, game_state)
