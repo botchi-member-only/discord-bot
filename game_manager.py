@@ -71,30 +71,29 @@ async def get_course_choices(interaction: discord.Interaction, current: str):
 # ==========================
 
 def setup(tree: app_commands.CommandTree):
-
     @tree.command(name="submittime", description="走行タイムを送信します")
     @app_commands.describe(
         course="走行したコース",
-        time="タイム (例: 1:23.456)"
+        time="タイム (例: 1:23.456)",
+        screenshot="走行結果のスクリーンショット"
     )
     async def submit_time(
         interaction: discord.Interaction,
         course: str,
-        time: str
+        time: str,
+        screenshot: discord.Attachment  # ← 追加
     ):
         game_state = load_json(GAMESTATE_FILE)
 
         current_state = game_state.get("state", "idle")
 
-        # idle状態でないと開始できない
         if current_state != "running":
             await interaction.response.send_message(
                 f"❌ 現在の状態は `{current_state}` のため送信できません。",
                 ephemeral=True
             )
             return
-        
-        # 実行者のみ表示
+    
         await interaction.response.defer(ephemeral=True)
 
         # フォーマットチェック
@@ -105,15 +104,24 @@ def setup(tree: app_commands.CommandTree):
             )
             return
 
+        # ==========================
+        # 画像チェック
+        # ==========================
+        if not screenshot.content_type or not screenshot.content_type.startswith("image"):
+            await interaction.followup.send(
+                "❌ 画像ファイルを添付してください。",
+                ephemeral=True
+            )
+            return
+
         state = load_json(GAMESTATE_FILE)
         if not state.get("active"):
-            await interaction.followup.send("❌ ゲームは開始されていません。", ephemeral=True)
+        await interaction.followup.send("❌ ゲームは開始されていません。", ephemeral=True)
             return
 
         user_id = str(interaction.user.id)
         team_name = None
 
-        # チーム検索
         for tname, team in state["teams"].items():
             for m in team["members"]:
                 if m["user_id"] == user_id:
@@ -135,7 +143,6 @@ def setup(tree: app_commands.CommandTree):
             await interaction.followup.send("❌ 無効なコースです。", ephemeral=True)
             return
 
-        # 保存データ読み込み
         records = load_json(TIMERECORD_FILE)
         if "records" not in records:
             records["records"] = []
@@ -152,9 +159,7 @@ def setup(tree: app_commands.CommandTree):
                 )
                 return
 
-        # ==========================
-        # 自分の同一コース記録があれば削除（上書き処理）
-        # ==========================
+        # 上書き処理
         records["records"] = [
             r for r in records["records"]
             if not (
@@ -171,7 +176,8 @@ def setup(tree: app_commands.CommandTree):
             "course_id": selected_course["id"],
             "course_name": selected_course["name"],
             "time": time,
-            "submitted_at": datetime.now().isoformat()
+            "submitted_at": datetime.now().isoformat(),
+            "image_url": screenshot.url  # ← 保存（任意）
         }
 
         records["records"].append(record)
@@ -179,19 +185,23 @@ def setup(tree: app_commands.CommandTree):
         save_json(TIMERECORD_FILE, records)
         trigger_time_record_update(records)
 
-        # 結果チャンネルへ送信
+        # ==========================
+        # 結果チャンネルへ送信（画像付き）
+        # ==========================
         channel = interaction.client.get_channel(RESULT_CHANNEL_ID)
         if channel:
+            file = await screenshot.to_file()    
             await channel.send(
                 f"⏱️ **タイム提出**\n"
                 f"チーム: {team_name}\n"
                 f"ユーザー: {interaction.user.mention}\n"
                 f"コース: {selected_course['name']}\n"
-                f"タイム: `{time}`"
+                f"タイム: `{time}`",
+                file=file
             )
 
         await interaction.followup.send(
-            f"✅ タイムを記録しました。**運営に走行動画を送信してください**\n"
+            f"✅ タイムを記録しました。\n"
             f"{selected_course['name']} : `{time}`",
             ephemeral=True
         )
