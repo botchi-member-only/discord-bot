@@ -116,7 +116,7 @@ def setup(tree: app_commands.CommandTree):
 
         state = load_json(GAMESTATE_FILE)
         if not state.get("active"):
-        await interaction.followup.send("❌ ゲームは開始されていません。", ephemeral=True)
+            await interaction.followup.send("❌ ゲームは開始されていません。", ephemeral=True)
             return
 
         user_id = str(interaction.user.id)
