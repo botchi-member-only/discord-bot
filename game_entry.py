@@ -515,7 +515,7 @@ def setup(tree: app_commands.CommandTree):
                 "🛣️ 担当コースをここで決定してください。\n"
                 "走行タイムは `/submittime` で送信してください。\n"
                  "走行コースを変更する際は必ず `/withdrawtime` で撤回してください。\n"
-                 "走行動画を運営に送ってください。\n"
+                 "タイムのスクリーンショットを添付してください。\n"
                 "`/myteamstatus` でチーム状況を確認できます。"
             )
 
