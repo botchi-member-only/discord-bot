@@ -384,7 +384,43 @@ def setup(tree: app_commands.CommandTree):
             await interaction.followup.send("❌ コース数が不足しています。")
             return
         # ★ 重複なしランダム抽選
-        selected_courses = random.sample(courses_data, course_count)
+        #selected_courses = random.sample(courses_data, course_count)
+        # ==========================
+        # 都市ごとにグループ化
+        # ==========================
+        city_groups = {}
+
+        for course in courses_data:
+            city = course["name"].split(" - ")[0]  # ROME など
+            if city not in city_groups:
+                city_groups[city] = []
+            city_groups[city].append(course)
+
+        # ==========================
+        # 都市ごとに1コース選出
+        # ==========================
+        selected_courses = []
+
+        cities = list(city_groups.keys())
+        random.shuffle(cities)
+
+        for city in cities:
+            selected_courses.append(random.choice(city_groups[city]))
+            if len(selected_courses) >= course_count:
+                break
+
+        # ==========================
+        # 都市数が足りない場合の補完
+        # ==========================
+        if len(selected_courses) < course_count:
+            remaining = [
+                c for c in courses_data if c not in selected_courses
+            ]
+            extra = random.sample(
+                remaining,
+                course_count - len(selected_courses)
+            )
+            selected_courses.extend(extra)
         # ==========================
         # マシン条件読み込み
         # ==========================
@@ -398,7 +434,6 @@ def setup(tree: app_commands.CommandTree):
         if course_count > len(courses_data):
             await interaction.followup.send("❌ コース数が不足しています。")
             return
-        selected_courses = random.sample(courses_data, course_count)
         # ★ コースごとにマシン条件をランダム決定（重複OK）
         course_machine_pairs = []
         for course in selected_courses:
