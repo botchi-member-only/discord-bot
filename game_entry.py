@@ -19,6 +19,21 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 # ==========================
 # 共通関数
 # ==========================
+def load_json_from_github(filename):
+    url = f"https://api.github.com/repos/{REPO}/contents/{filename}"
+
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3.raw"
+    }
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code != 200:
+        print(f"GitHub取得失敗: {filename}")
+        return None
+
+    return response.json()
 
 def load_json(path):
     if not os.path.exists(path):
@@ -578,3 +593,42 @@ def setup(tree: app_commands.CommandTree):
             view=view,
             ephemeral=True
         )
+    @tree.command(name="readgamedata", description="GitHubから全データを再読み込みします")
+    async def read_game_data(interaction: discord.Interaction):
+
+        if not is_admin(interaction):
+            await interaction.response.send_message("❌ 管理者専用です", ephemeral=True)
+            return
+
+        await interaction.response.defer(ephemeral=True)
+
+        files = [
+            MEMBER_FILE,
+            GAME_FILE,
+            COURSE_FILE,
+            MACHINE_FILE,
+            GAMESTATE_FILE,
+            TIMERECORD_FILE
+        ]
+
+        success = []
+        failed = []
+
+        for file in files:
+            data = load_json_from_github(file)
+
+            if data is None:
+                failed.append(file)
+                continue
+
+            save_json(file, data)
+            success.append(file)
+
+        msg = "📥 **GitHubからデータを再読み込みしました**\n\n"
+
+        if success:
+            msg += "✅ 成功:\n" + "\n".join(success) + "\n\n"
+        if failed:
+            msg += "❌ 失敗:\n" + "\n".join(failed)
+
+        await interaction.followup.send(msg, ephemeral=True)
