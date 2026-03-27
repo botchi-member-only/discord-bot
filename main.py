@@ -190,6 +190,62 @@ def trigger_github_action(data):
     r = requests.post(url, headers=headers, json=payload)
     print("GitHub Action Trigger:", r.status_code, r.text)
 
+@tree.command(name="send", description="指定メッセージを別チャンネルへ送信します")
+@app_commands.describe(
+    channel_id="送信先チャンネルID",
+    message_url="送信したいメッセージURL"
+)
+async def send_message(
+    interaction: discord.Interaction,
+    channel_id: str,
+    message_url: str
+):
+    await interaction.response.defer(ephemeral=True)
+
+    # ▼ URLから guild / channel / message ID を取得
+    try:
+        parts = message_url.split("/")
+        guild_id = int(parts[-3])
+        src_channel_id = int(parts[-2])
+        message_id = int(parts[-1])
+    except:
+        await interaction.followup.send("❌ メッセージURLの形式が不正です。")
+        return
+
+    # ▼ 元メッセージ取得
+    try:
+        src_channel = client.get_channel(src_channel_id)
+        if src_channel is None:
+            src_channel = await client.fetch_channel(src_channel_id)
+
+        message = await src_channel.fetch_message(message_id)
+    except:
+        await interaction.followup.send("❌ 元メッセージの取得に失敗しました。")
+        return
+
+    # ▼ 送信先チャンネル取得
+    try:
+        target_channel = client.get_channel(int(channel_id))
+        if target_channel is None:
+            target_channel = await client.fetch_channel(int(channel_id))
+    except:
+        await interaction.followup.send("❌ 送信先チャンネルが見つかりません。")
+        return
+
+    # ▼ メッセージ送信（内容 + 添付ファイル）
+    try:
+        files = []
+        for attachment in message.attachments:
+            files.append(await attachment.to_file())
+
+        content = message.content if message.content else ""
+
+        await target_channel.send(content=content, files=files)
+
+        await interaction.followup.send("✅ メッセージを送信しました。")
+    except Exception as e:
+        await interaction.followup.send(f"❌ 送信に失敗しました: {e}")
+
 
 @client.event
 async def on_message(message):
